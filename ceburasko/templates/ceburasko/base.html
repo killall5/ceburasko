@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+<head>
+    <link rel="stylesheet" href="{% static 'ceburasko/css/bootstrap.min.css' %}">
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="{% static 'ceburasko/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'ceburasko/google-code-prettify/prettify.js' %}"></script>
+    <title>{% block title %}Ceburasko{% endblock %}</title>
+</head>
+<body class="container-fluid" onload="prettyPrint()">
+    <div class="row-fluid">
+    {% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li class="active">Projects</li>
+    </ol>
+    {% endblock %}
+    </div>
+    <div class="row-fluid">
+        <div class="col-md-1 col-sm-1"></div>
+        <div class="col-md-10 col-sm-10">
+            {% block body %}{% endblock %}
+        </div>
+        <div class="col-md-1 col-sm-1"></div>
+    </div>
+</body>
+</html>

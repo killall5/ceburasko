@@ -1,0 +1,28 @@
+{% extends 'ceburasko/base.html' %}
+{% load url from future %}
+
+{% block body %}
+<h1>Projects</h1>
+
+{% if projects %}
+<table class="table table-stripped">
+    <tr>
+        <th>#</th>
+        <th>Project title</th>
+        <th>Opened issues</th>
+        <th>Fixed issues</th>
+    </tr>
+    {% for project in projects %}
+    <tr>
+        <td>{{project.id}}</td>
+        <td><a href="{% url 'ceburasko:project_details' project.id %}">{{project}}</a></td>
+        <td>{{project.opened_issues}}</td>
+        <td>{{project.fixed_issues}}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+    <p>No projects available.</p>
+{% endif %}
+{% endblock %}
+

@@ -1,0 +1,90 @@
+{% extends 'ceburasko/base.html' %}
+{% load url from future %}
+
+{% block title %}{{ project }} &mdash; Ceburasko{% endblock %}
+
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'ceburasko:index' %}">Projects</a></li>
+        <li class="active">{{ project }}</li>
+    </ol>
+{% endblock %}
+
+{% block body %}
+<h1>{{ project }}</h1>
+
+<h2>Opened issues {% if opened_issues %}<small>{{opened_issues.paginator.count}} total</small>{%endif%}</h2>
+{% if opened_issues %}
+<table class="table table-striped">
+    <tr>
+        <th>#</th>
+        <th>Summary</th>
+        <th>Foreign</th>
+        <th>Crashes</th>
+        <th>Updated</th>
+        <th>Latest version</th>
+    </tr>
+    {% for issue in opened_issues %}
+    <tr>
+        <td>{{ issue.id }}</td>
+        <td><a href="{% url 'ceburasko:issue_details' issue.id %}">{{ issue }}</a></td>
+        <td>{% for fi in issue.foreignissue_set.all %}<a href="{{fi.url}}">{{fi.key}}</a> {%endfor%}</td>
+        <td>{{ issue.crashreport_set.count }}</td>
+        <td>{{ issue.modified|date:'Y-m-d H:i:s' }}</td>
+        <td>{{ issue.last_affected_version }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<nav>
+    <ul class="pagination">
+        {% for i in opened_issues.paginator.page_range %}
+            {% if i == opened_issues.number %}
+                <li class="active"><a href="#">{{ i }}</a></li>
+            {% else %}
+                <li><a href="?op={{i}}&fp={{fixed_issues.number}}">{{i}}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</nav>
+{% else %}
+<p>No opened issues. Great!</p>
+{% endif %}
+
+
+<h2>Fixed issues {% if fixed_issues %}<small>{{fixed_issues.paginator.count}} total</small>{%endif%}</h2>
+{% if fixed_issues %}
+<table class="table table-striped">
+    <tr>
+        <th>#</th>
+        <th>Summary</th>
+        <th>Crashes</th>
+        <th>Fixed version</th>
+    </tr>
+    {% for issue in fixed_issues %}
+    <tr>
+        <td>{{ issue.id }}</td>
+        <td><a href="{% url 'ceburasko:issue_details' issue.id %}">{{ issue }}</a></td>
+        <td>{{ issue.crashreport_set.count }}</td>
+        <td>{{ issue.fixed_version }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<nav>
+    <ul class="pagination">
+        {% for i in fixed_issues.paginator.page_range %}
+            {% if i == fixed_issues.number %}
+                <li class="active"><a href="#">{{ i }}</a></li>
+            {% else %}
+                <li><a href="?fp={{i}}&op={{opened_issues.number}}">{{i}}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</nav>
+{% else %}
+<p>No issues.</p>
+{% endif %}
+
+
+{% endblock %}

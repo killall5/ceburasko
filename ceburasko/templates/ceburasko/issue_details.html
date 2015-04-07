@@ -1,0 +1,110 @@
+{% extends "ceburasko/base.html" %}
+{% load url from future %}
+
+{% block title %} {{ issue }} &mdash; {{ issue.project }} &mdash; Ceburasko {% endblock %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+    <li><a href="{% url 'ceburasko:index' %}">Projects</a></li>
+    <li><a href="{% url 'ceburasko:project_details' issue.project.id %}">{{ issue.project }}</a></li>
+    <li class="active">{{issue}}</li>
+</ol>
+{% endblock breadcrumbs %}
+
+{% block body %}
+<form class="form-horizontal" role="form" action="{% url 'ceburasko:issue_modify' issue.id %}" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <div class="col-md-12 col-xs-12">
+            <input type="input" id="title" name="title" class="form-control input-lg" value="{{ issue.title }}" placeholder="{{issue}}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-3 col-xs-3 control-label">Crashes</label>
+        <div class="col-md-3 col-xs-5">
+            <p class="form-control-static">{{ issue.crashreport_set.count }}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-3 col-xs-3 control-label">Last affected</label>
+        <div class="col-md-3 col-xs-5">
+            <p class="form-control-static">{{ issue.last_affected_version }}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="fixed_version" class="col-md-3 col-xs-3 control-label">Version fixed</label>
+        <div class="col-md-3 col-xs-5">
+            <input type="input" class="form-control" id="fixed_version" name="fixed_version" value="{%if issue.fixed_version%}{{ issue.fixed_version }}{%endif%}"/>
+        </div>
+        <p class="help-block">
+        {% if issue.status %}
+            <span class="label label-success">Fixed</span>
+        {% else %}
+            <span class="label label-danger">Not fixed</span>
+        {% endif %}
+        </p>
+    </div>
+    {% for tracker in foreign_trackers %}
+    <div class="form-group">
+        <label for="tracker{{tracker.id}}" class="col-md-3 col-xs-3 control-label">{{ tracker }} issue</label>
+        <div class="col-md-3 col-xs-5">
+            <input type="input" id="tracker{{tracker.id}}}" name="tracker{{tracker.id}}" class="form-control" value="{{tracker.issue_key}}" />
+        </div>                
+        <p class="help-block">
+        {% if tracker.issue_status %}
+            <span class="label label-{% if tracker.issue_status.0 %}success{%else%}danger{%endif%}">{{tracker.issue_status.1}}</span> 
+        {% endif %}
+        {% if tracker.issue_url %}
+            <a href="{{tracker.issue_url}}">Visit</a>
+        {% endif %}
+        </p>
+    </div>
+    {% endfor %}
+    <div class="form-group">
+        <div class="col-md-offset-3 col-xs-offset-3 col-md-1 col-xs-1">
+            <button type="submit" class="btn btn-default">Save</button>
+        </div>
+        <div class="col-xs-8 col-md-8">
+            <a class="btn btn-danger" href="{% url 'ceburasko:issue_delete' issue.id %}">Delete</a>
+        </div>
+    </div>
+</form>
+
+<h2>Description</h2>
+
+<pre>{{ issue.description|linebreaksbr }}</pre>
+        
+<h2>Crash reports</h2>
+
+<table class="table table-striped">
+    <tr>
+        <th>#</th>
+        <th>Date</th>
+        <th>Kind</th>
+        <th>IP address</th>
+        <th>Component</th>
+        <th>Version</th>
+    </tr>
+{% for crash in crashes %}
+    <tr>
+        <td><a href="{%url 'ceburasko:crash_details' crash.id %}">{{ crash.id }}</a></td>
+        <td>{{ crash.datetime|date:"Y-m-d H:i:s" }}</td>
+        <td>{{ crash.kind }}</td>
+        <td>{{ crash.ip }}</td>
+        <td>{{ crash.component }}</td>
+        <td>{{ crash.version }}</td>
+    </tr>
+{% endfor %}
+</table>
+
+<nav class="center-block">
+    <ul class="pagination">
+{% for i in crashes.paginator.page_range %}
+    {% if i == crashes.number %}
+        <li class="active"><a href="#">{{i}}</a></li>
+    {% else %}
+        <li><a href="?page={{i}}">{{i}}</a></li>
+    {% endif %}
+{% endfor %}
+</nav>
+{% endblock %}

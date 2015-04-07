@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+import sys
+import subprocess
+import os
+import hashlib
+import tempfile
+import signal
+from argparse import ArgumentParser
+
+def main():
+    parser = ArgumentParser()
+    parser.add_argument('--valgrind-dir',
+        help = 'Valgrind log output directory',
+        default = None)
+    parser.add_argument('program',
+        help = 'Full path to your program')
+    parser.add_argument('args', metavar='arg',
+        nargs = '*',
+        help = 'Your program args')
+    args = parser.parse_args()
+
+    exec_hash = hashlib.new('sha256')
+    with open(args.program, 'r') as exec_file:
+        exec_hash.update(exec_file.read())
+    log_filename = tempfile.mkstemp(prefix='valgrind.', suffix='.log.xml', dir=args.valgrind_dir)[1]
+    binary_comment = 'sha256:%s' % exec_hash.hexdigest()
+
+    valgrind = [ '/usr/bin/valgrind' ]
+    valgrind += [ '--xml=yes', '--xml-file=%s' % log_filename ]
+    valgrind += [ '--xml-user-comment=%s' % binary_comment ]
+    valgrind += [ args.program ] + args.args
+    process = subprocess.Popen( valgrind )
+    try:
+        process.wait()
+    except KeyboardInterrupt as ki:
+        process.send_signal(signal.SIGINT)
+
+if __name__ == '__main__':
+    main()
