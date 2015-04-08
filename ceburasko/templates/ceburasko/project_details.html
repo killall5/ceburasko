@@ -5,7 +5,7 @@
 
 {% block breadcrumbs %}
     <ol class="breadcrumb">
-        <li><a href="{% url 'ceburasko:index' %}">Projects</a></li>
+        <li><a href="{% url 'ceburasko:projects' %}">Projects</a></li>
         <li class="active">{{ project }}</li>
     </ol>
 {% endblock %}
@@ -13,14 +13,37 @@
 {% block body %}
 <h1>{{ project }}</h1>
 
-<h2>Opened issues {% if opened_issues %}<small>{{opened_issues.paginator.count}} total</small>{%endif%}</h2>
+<h2>Builds</h2>
+
+{% if builds %}
+<table class="table table-striped">
+    <tr>
+        <th>version</th>
+        <th>created</th>
+        <th>issues</th>
+        <th>fixed issues</th>
+    </tr>
+    {% for build in builds %}
+    <tr>
+        <td>{{ build.version }}</td>
+        <td>{{ build.created_time }}</td>
+        <td>{{ build.issues_set }}</td>
+        <td>{{ build.fixed_issues_count }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No builds. Is anybody here?</p>
+{% endif%}
+
+<h2>Opened issues {% if opened_issues %}<small>{{opened_issues_count}} total</small>{%endif%}</h2>
 {% if opened_issues %}
 <table class="table table-striped">
     <tr>
         <th>#</th>
         <th>Summary</th>
         <th>Foreign</th>
-        <th>Crashes</th>
+        <th>Accidents</th>
         <th>Updated</th>
         <th>Latest version</th>
     </tr>
@@ -29,59 +52,39 @@
         <td>{{ issue.id }}</td>
         <td><a href="{% url 'ceburasko:issue_details' issue.id %}">{{ issue }}</a></td>
         <td>{% for fi in issue.foreignissue_set.all %}<a href="{{fi.url}}">{{fi.key}}</a> {%endfor%}</td>
-        <td>{{ issue.crashreport_set.count }}</td>
-        <td>{{ issue.modified|date:'Y-m-d H:i:s' }}</td>
-        <td>{{ issue.last_affected_version }}</td>
+        <td>{{ issue.accident_set.count }}</td>
+        <td>{{ issue.modified_time|date:'Y-m-d H:i:s' }}</td>
+        <td>?</td>
     </tr>
     {% endfor %}
 </table>
-
-<nav>
-    <ul class="pagination">
-        {% for i in opened_issues.paginator.page_range %}
-            {% if i == opened_issues.number %}
-                <li class="active"><a href="#">{{ i }}</a></li>
-            {% else %}
-                <li><a href="?op={{i}}&fp={{fixed_issues.number}}">{{i}}</a></li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-</nav>
+<p><a href="{% url 'ceburasko:issues' project.id %}">View all opened issues</a></p>
 {% else %}
 <p>No opened issues. Great!</p>
 {% endif %}
 
 
-<h2>Fixed issues {% if fixed_issues %}<small>{{fixed_issues.paginator.count}} total</small>{%endif%}</h2>
+<h2>Fixed issues {% if fixed_issues %}<small>{{fixed_issues_count}} total</small>{%endif%}</h2>
 {% if fixed_issues %}
 <table class="table table-striped">
     <tr>
         <th>#</th>
         <th>Summary</th>
-        <th>Crashes</th>
+        <th>Accidents</th>
         <th>Fixed version</th>
     </tr>
     {% for issue in fixed_issues %}
     <tr>
         <td>{{ issue.id }}</td>
         <td><a href="{% url 'ceburasko:issue_details' issue.id %}">{{ issue }}</a></td>
-        <td>{{ issue.crashreport_set.count }}</td>
+        <td>{{ issue.accident_set.count }}</td>
         <td>{{ issue.fixed_version }}</td>
     </tr>
     {% endfor %}
 </table>
 
-<nav>
-    <ul class="pagination">
-        {% for i in fixed_issues.paginator.page_range %}
-            {% if i == fixed_issues.number %}
-                <li class="active"><a href="#">{{ i }}</a></li>
-            {% else %}
-                <li><a href="?fp={{i}}&op={{opened_issues.number}}">{{i}}</a></li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-</nav>
+<p><a href="{% url 'ceburasko:fixed-issues' project.id %}">View all fixed issues</a></p>
+
 {% else %}
 <p>No issues.</p>
 {% endif %}

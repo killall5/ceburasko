@@ -1,13 +1,88 @@
 # Create your views here.
 
 from django.shortcuts import get_object_or_404, render_to_response
-from ceburasko.models import Project, Issue, CrashReport, Frame, ForeignTracker, ForeignIssue
+from ceburasko.models import Project, Issue, Frame, ForeignTracker, ForeignIssue
 from django.db.models import Count
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 import yaml
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+"""
+ Helper for paginate source
+"""
+
+def get_paginator(source, page_size, page):
+    paginator = Paginator(source, page_size)
+    try:
+        return paginator.page(page)
+    except PageNotAnInteger:
+        return paginator.page(1)
+    except EmptyPage:
+        return paginator.page(paginator.num_pages)
+
+
+"""
+ Ceburasko main page
+
+ Show list of projects
+"""
+def project_list(request):
+    projects = Project.objects.all()
+    for p in projects:
+        p.opened_issues = p.issue_set.filter(is_fixed = False).count()
+        p.fixed_issues = p.issue_set.count() - p.opened_issues
+    return render_to_response('ceburasko/project.html', { 'projects': projects })
+
+"""
+ Project details page
+
+ Show related issues
+"""
+
+def project_details(request, project_id):
+    p = get_object_or_404(Project, pk = project_id)
+    opened_issues = p.issue_set.filter(is_fixed = False).all()
+    opened_issues_count = len(opened_issues)
+    opened_issues = opened_issues[:5]
+    fixed_issues = p.issue_set.filter(is_fixed = True).all()
+    fixed_issues_count = len(fixed_issues)
+    fixed_issues = fixed_issues[:5]
+    builds = p.build_set.all()[:5]
+
+    return render_to_response('ceburasko/project_details.html',
+        {
+         'project': p,
+         'opened_issues': opened_issues,
+         'opened_issues_count': opened_issues_count,
+         'fixed_issues': fixed_issues,
+         'fixed_issues_count': fixed_issues_count,
+         'builds': builds,
+        }
+    )
+
+"""
+ Project issues list
+"""
+
+def issue_list(request, project_id, is_fixed = False):
+    p = get_object_or_404(Project, pk = project_id)
+    issues = p.issue_set.filter(is_fixed = is_fixed)
+    issues_paged = get_paginator(issues, 10, request.GET.get('page'))
+
+    return render_to_response('ceburasko/issue_list.html',
+        {
+            'is_fixed': is_fixed,
+            'project': p,
+            'issues': issues_paged,
+        }
+    )
+
+"""
+TODO: Ooooold stuff
+"""
+
 
 @csrf_exempt
 def upload_crash(request, project_id):
@@ -49,31 +124,7 @@ def upload_crash(request, project_id):
 
     return HttpResponse("issue id %s, fixed: %s" % (issue.id, issue.status) )
 
-def get_paginator(source, page_size, page):
-    paginator = Paginator(source, page_size)
-    try:
-        return paginator.page(page)
-    except PageNotAnInteger:
-        return paginator.page(1)
-    except EmptyPage:
-        return paginator.page(paginator.num_pages)
 
-def index(request):
-    projects = Project.objects.all()
-    for p in projects:
-        p.opened_issues = p.issue_set.filter(status = False).count()
-        p.fixed_issues = p.issue_set.count() - p.opened_issues
-    return render_to_response('ceburasko/index.html', { 'projects': projects })
-
-def project_details(request, project_id):
-    p = get_object_or_404(Project, pk = project_id)
-    opened_issues = get_paginator(
-        p.issue_set.annotate(num_crashes = Count('crashreport')).filter(status = False).order_by('-num_crashes'),
-        25, request.GET.get('op'))
-    fixed_issues = get_paginator(
-        p.issue_set.annotate(num_crashes = Count('crashreport')).filter(status = True).order_by('-num_crashes'),
-        25, request.GET.get('fp'))
-    return render_to_response('ceburasko/project_details.html', {'project': p, 'opened_issues': opened_issues, 'fixed_issues': fixed_issues})
     
 
 from django.template import RequestContext
