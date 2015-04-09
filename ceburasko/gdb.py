@@ -27,7 +27,6 @@ def parse_stack(data):
 def parse_gdb(istream):
     state = 0
     crash = {}
-    pattern = re.compile(' +\([^)]*\)?( at .+)?$')
     for line in istream:
         if state == 0:
             if line.startswith("Program terminated"):
@@ -69,7 +68,7 @@ def errors_from_gdb_log(filename):
 
     binary_id = None
     try:
-        ind = log.index('end-of-exe-id.')
+        ind = log.index('end-of-binary-id.')
         if ind > 0:
             binary_id = log[0].split()[0]
         log = log[ind+1:]
