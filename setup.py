@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
-from itertools import chain
 import os
 import os.path
 
+
 def files(basedir, dirs):
-    for dir in dirs:
-        for (path, _, files) in os.walk(os.path.join(basedir, dir)):
-            for file in files:
-                yield os.path.relpath(os.path.join(path, file), basedir)
+    for directory in dirs:
+        for (path, _, file_list) in os.walk(os.path.join(basedir, directory)):
+            for filename in file_list:
+                yield os.path.relpath(os.path.join(path, filename), basedir)
 
 setup(
     name = 'ceburasko',
@@ -19,9 +19,9 @@ setup(
     author = 'Alexey Tamarevskiy',
     author_email = 'mirror@inetra.ru',
     packages = [ 'ceburasko' ],
-    package_data = { 'ceburasko': list(files('ceburasko', ('static', 'templates'))) } ,
+    package_data = { 'ceburasko': list(files('ceburasko', ('static', 'templates'))) },
     scripts = [
-        'ceburasko-exe-id',
+        'ceburasko-binary-id',
         'ceburasko-upload-binaries',
         'ceburasko-upload-gdb-log',
         'ceburasko-upload-valgrind-log',

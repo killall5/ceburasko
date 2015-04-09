@@ -1,18 +1,20 @@
 import re
 
-def parse_stack(data):
-    def line_generator(data):
-        out = ''
-        for line in data:
-            if line.startswith('#'):
-                if out:
-                    yield out
-                out = line
-            else:
-                out += ' ' + line
-        if out:
-            yield out
 
+def line_generator(data):
+    out = ''
+    for line in data:
+        if line.startswith('#'):
+            if out:
+                yield out
+            out = line
+        else:
+            out += ' ' + line
+    if out:
+        yield out
+
+
+def parse_stack(data):
     sourced_line = re.compile('^#\d+ +(0x[0-9a-fA-F]+ in )?(?P<fn>.+) \([^)]*\) at (?P<file>[^=].*):(?P<line>\d+)')
     no_sourced_line = re.compile('^#\d+ +(0x[0-9a-fA-F]+ in )?(?P<fn>.+) \([^)]*\)')
     for line in line_generator(data):
@@ -21,8 +23,8 @@ def parse_stack(data):
             result = no_sourced_line.search(line)
         yield result.groupdict()
 
+
 def parse_gdb(istream):
-    res = {}
     state = 0
     crash = {}
     pattern = re.compile(' +\([^)]*\)?( at .+)?$')
@@ -60,15 +62,16 @@ def parse_gdb(istream):
         del crash['line']
         yield crash
 
+
 def errors_from_gdb_log(filename):
     with open(filename) as f:
         log = f.read().split('\n')
 
-    exe_id = None
+    binary_id = None
     try:
         ind = log.index('end-of-exe-id.')
         if ind > 0:
-            exe_id = log[0].split()[0]
+            binary_id = log[0].split()[0]
         log = log[ind+1:]
     except:
         # gdb log must be prepended with exe ids
@@ -77,6 +80,6 @@ def errors_from_gdb_log(filename):
     annotation = '\n'.join(log)
     for error in parse_gdb(log):
         error['annotation'] = annotation
-        if exe_id:
-            error['exe_id'] = exe_id
+        if binary_id:
+            error['binary_id'] = binary_id
         yield error

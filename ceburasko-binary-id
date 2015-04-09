@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-from ceburasko.exe_id import exe_id
+from ceburasko.binary_id import binary_id
+
 
 if __name__ == "__main__":
     import sys
-    for file in sys.argv[1:]:
+    for filename in sys.argv[1:]:
         try:
-            print "%s %s" % (exe_id(file), file)
+            print "%s %s" % (binary_id(file), file)
         except Exception as e:
             print "%s: %s" % (sys.argv[0], e)

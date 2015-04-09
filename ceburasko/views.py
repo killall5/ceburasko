@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, render_to_response
 from ceburasko.models import *
 from django.db.models import Count
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 import yaml
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -12,6 +12,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 """
  Helper for paginate source
 """
+
 
 def get_paginator(source, page_size, page):
     paginator = Paginator(source, page_size)
@@ -28,12 +29,14 @@ def get_paginator(source, page_size, page):
 
  Show list of projects
 """
+
+
 def project_list(request):
     projects = Project.objects.all()
     for p in projects:
-        p.opened_issues = p.issue_set.filter(is_fixed = False).count()
+        p.opened_issues = p.issue_set.filter(is_fixed=False).count()
         p.fixed_issues = p.issue_set.count() - p.opened_issues
-    return render_to_response('ceburasko/project.html', { 'projects': projects })
+    return render_to_response('ceburasko/project.html', {'projects': projects})
 
 """
  Project details page
@@ -41,12 +44,13 @@ def project_list(request):
  Show related issues
 """
 
+
 def project_details(request, project_id):
-    p = get_object_or_404(Project, pk = project_id)
-    opened_issues = p.issue_set.filter(is_fixed = False).all()
+    p = get_object_or_404(Project, pk=project_id)
+    opened_issues = p.issue_set.filter(is_fixed=False).all()
     opened_issues_count = len(opened_issues)
     opened_issues = opened_issues[:5]
-    fixed_issues = p.issue_set.filter(is_fixed = True).all()
+    fixed_issues = p.issue_set.filter(is_fixed=True).all()
     fixed_issues_count = len(fixed_issues)
     fixed_issues = fixed_issues[:5]
     builds = p.build_set.all()[:5]
@@ -66,6 +70,7 @@ def project_details(request, project_id):
  Project issues list
 """
 
+
 def issue_list(request, project_id, is_fixed = False):
     p = get_object_or_404(Project, pk = project_id)
     issues = p.issue_set.filter(is_fixed = is_fixed)
@@ -79,6 +84,13 @@ def issue_list(request, project_id, is_fixed = False):
         }
     )
 
+"""
+ Upload new binary info
+
+ If needed, new build in project created
+"""
+
+
 @csrf_exempt
 def upload_binaries(request, project_id):
     p = get_object_or_404(Project, pk=project_id)
@@ -88,7 +100,7 @@ def upload_binaries(request, project_id):
     try:
         build = p.build_set.get(version=version)
         action = "updated"
-    except:
+    except ObjectDoesNotExist as e:
         build = Build.objects.create(project=p, version=version, created_time=timezone.now())
         action = "created"
     for exe_id, components in components.items():
@@ -96,13 +108,25 @@ def upload_binaries(request, project_id):
             continue
         component = components[0]
         try:
-            binary = Binary.objects.filter(hash=exe_id)[0]
+            binary = Binary.objects.get(hash=exe_id)
             binary.build = build
             binary.filename = component
             binary.save()
-        except IndexError as e:
+        except ObjectDoesNotExist as e:
             Binary.objects.create(build=build, hash=exe_id, filename=components[0])
     return HttpResponse("%s %s with %d binaries" % (build, action, build.binary_set.count()))
+
+"""
+ Batch upload accidents
+"""
+
+@csrf_exempt
+def upload_accidents(request):
+    payload = yaml.load(request.body)
+    if not isinstance(payload, list):
+        payload = [payload]
+    for case in payload:
+        binary_id = case['exe']
 
 
 """
@@ -151,12 +175,11 @@ def upload_crash(request, project_id):
     return HttpResponse("issue id %s, fixed: %s" % (issue.id, issue.status) )
 
 
-    
-
 from django.template import RequestContext
 
+
 def issue_details(request, issue_id):
-    issue = get_object_or_404(Issue, pk = issue_id)
+    issue = get_object_or_404(Issue, pk=issue_id)
     # FIXME: needs left join
     foreign_trackers = {}
     for tracker in ForeignTracker.objects.all():

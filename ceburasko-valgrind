@@ -7,7 +7,7 @@ import hashlib
 import tempfile
 import signal
 from argparse import ArgumentParser
-from ceburasko.exe_id import exe_id
+from ceburasko.binary_id import binary_id
 
 def main():
     parser = ArgumentParser()
@@ -21,7 +21,7 @@ def main():
         help = 'Your program args')
     args = parser.parse_args()
 
-    binary_comment = exe_id(args.program)
+    binary_comment = binary_id(args.program)
     log_filename = tempfile.mkstemp(prefix='valgrind.', suffix='.log.part', dir=args.valgrind_dir)[1]
 
     valgrind = [ '/usr/bin/valgrind' ]
