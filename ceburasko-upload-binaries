@@ -13,9 +13,9 @@ def is_exe(path):
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('version', help = 'builded version')
-    parser.add_argument('basedir', help = 'directory with builded binaries')
-    parser.add_argument('url', help = 'Ceburasko project URL')
+    parser.add_argument('version', help='builded version')
+    parser.add_argument('basedir', help='directory with builded binaries')
+    parser.add_argument('url', help='Ceburasko project URL')
     args = parser.parse_args()
     basedir = args.basedir
 
@@ -29,8 +29,8 @@ def main():
                 if id in ids:
                     ids[id].append(component)
                 else:
-                    ids[id] = [ component ]
-    upload_binary_info( version = args.version, ids = ids, project_url = args.url )
+                    ids[id] = [component]
+    print upload_binary_info(version=args.version, ids=ids, project_url=args.url).read()
 
 if __name__ == '__main__':
     main()

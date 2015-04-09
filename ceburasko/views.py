@@ -1,7 +1,7 @@
 # Create your views here.
 
 from django.shortcuts import get_object_or_404, render_to_response
-from ceburasko.models import Project, Issue, Frame, ForeignTracker, ForeignIssue
+from ceburasko.models import *
 from django.db.models import Count
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -78,6 +78,32 @@ def issue_list(request, project_id, is_fixed = False):
             'issues': issues_paged,
         }
     )
+
+@csrf_exempt
+def upload_binaries(request, project_id):
+    p = get_object_or_404(Project, pk=project_id)
+    payload = yaml.load(request.body)
+    version = Version(payload['version'])
+    components = payload['components']
+    try:
+        build = p.build_set.get(version=version)
+        action = "updated"
+    except:
+        build = Build.objects.create(project=p, version=version, created_time=timezone.now())
+        action = "created"
+    for exe_id, components in components.items():
+        if not components:
+            continue
+        component = components[0]
+        try:
+            binary = Binary.objects.filter(hash=exe_id)[0]
+            binary.build = build
+            binary.filename = component
+            binary.save()
+        except IndexError as e:
+            Binary.objects.create(build=build, hash=exe_id, filename=components[0])
+    return HttpResponse("%s %s with %d binaries" % (build, action, build.binary_set.count()))
+
 
 """
 TODO: Ooooold stuff
