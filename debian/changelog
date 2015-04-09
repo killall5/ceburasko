@@ -1,4 +1,16 @@
-ceburasko (1.9.2-1) stable; urgency=low
+ceburasko (2.0-6) stable; urgency=low
+
+  * Refactoring
+
+ -- Alexey Tamarevskiy <mirror@inetra.ru>  Thu, 02 Apr 2015 13:17:20 +0600
+
+ceburasko (1.10-5) stable; urgency=low
+
+  * Add valgrind logs automatically uploader
+
+ -- Alexey Tamarevskiy <mirror@inetra.ru>  Tue, 31 Mar 2015 18:37:49 +0600
+
+ceburasko (1.9.3-1) stable; urgency=low
 
   * Add valgrind uploader
 

@@ -7,8 +7,8 @@ Standards-Version: 3.8.4
 
 Package: python-ceburasko
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, python-argparse, python-yaml
-Conflicts: python-django (< 1.4)
+Depends: ${misc:Depends}, ${python:Depends}, python-argparse, python-yaml, binutils
+Conflicts: python-django (<< 1.4)
 Recommends: python-django (>= 1.4)
 XB-Python-Version: ${python:Versions}
 Provides: ${python:Provides}

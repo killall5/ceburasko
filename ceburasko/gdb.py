@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-
 import re
-import argparse
 
 def parse_stack(data):
     def line_generator(data):
@@ -24,13 +21,12 @@ def parse_stack(data):
             result = no_sourced_line.search(line)
         yield result.groupdict()
 
-def crashreport(istream):
+def parse_gdb(istream):
     res = {}
     state = 0
     crash = {}
     pattern = re.compile(' +\([^)]*\)?( at .+)?$')
     for line in istream:
-        line = line.strip()
         if state == 0:
             if line.startswith("Program terminated"):
                 state = 1
@@ -64,27 +60,23 @@ def crashreport(istream):
         del crash['line']
         yield crash
 
-if __name__ == "__main__":
-    import sys
-    import urllib2
-    import yaml
+def errors_from_gdb_log(filename):
+    with open(filename) as f:
+        log = f.read().split('\n')
 
-    from argparse import ArgumentParser
-    parser = ArgumentParser()
-    parser.add_argument('upload_url', 
-        help = 'Ceburasko URL for upload crash stack')
-    parser.add_argument('--component', default = None)
-    parser.add_argument('--version', default = None)
-    parser.add_argument('--timeout', type=int, default=10)
-    args = parser.parse_args()
-    annotation = sys.stdin.read()
+    exe_id = None
+    try:
+        ind = log.index('end-of-exe-id.')
+        if ind > 0:
+            exe_id = log[0].split()[0]
+        log = log[ind+1:]
+    except:
+        # gdb log must be prepended with exe ids
+        return
 
-    for crash in crashreport(annotation.split('\n')):
-        crash['component'] = args.component
-        crash['version'] = args.version
-        crash['annotation'] = annotation
-        try:
-            request = urllib2.Request(args.upload_url, yaml.dump(crash), {'Content-Type': 'application/x-yaml'} )
-            response = urllib2.urlopen(request, timeout = args.timeout)
-        except Exception as e:
-            print >>sys.stderr, str(e)
+    annotation = '\n'.join(log)
+    for error in parse_gdb(log):
+        error['annotation'] = annotation
+        if exe_id:
+            error['exe_id'] = exe_id
+        yield error

@@ -1,8 +1,5 @@
-#!/usr/bin/env python
-
 import xml.etree.ElementTree as ET
 import os
-import argparse
 
 class Frame():
     def __init__(self):
@@ -29,7 +26,7 @@ class Frame():
         else:
             return os.path.join(self.dir, self.file)
 
-def errors_from_xml_file(filename):
+def parse_valgrind(filename):
     def parse_kind(kind, error):
         error['kind'] = kind.text
 
@@ -71,9 +68,9 @@ def errors_from_xml_file(filename):
                   'auxwhat': parse_auxwhat,
                   'stack':   parse_stack,
                 }
-    exe_hash = None
+    exe_id = None
     for usercomment in root.findall('usercomment'):
-        exe_hash = usercomment.text
+        exe_id = usercomment.text
     exe_filename = None
     for args_ in root.findall('args'):
         for argv_ in args_.findall('argv'):
@@ -85,7 +82,7 @@ def errors_from_xml_file(filename):
     for xml_error in root.findall('error'):
         error = { 
             'stack': 'what_stack',
-            'exe_hash': exe_hash,
+            'exe_id': exe_id,
             'exe_filename': exe_filename,
         }
         for child in xml_error:
@@ -96,8 +93,8 @@ def errors_from_xml_file(filename):
     return errors
 
 
-def ceburasko_crash(error):
-    res = {'component': error['exe_filename'], 'exe_hash': error['exe_hash']}
+def crash(error):
+    res = { 'exe_id': error['exe_id']}
     if 'kind' in error:
         res['kind'] = error['kind']
     if 'what' in error:
@@ -119,21 +116,6 @@ def ceburasko_crash(error):
     res['annotation'] = '\n'.join(annotation)
     return res
 
-if __name__ == "__main__":
-    import sys
-    import urllib2
-    import yaml
-
-    from argparse import ArgumentParser
-    parser = ArgumentParser()
-    parser.add_argument('xml',
-        help = 'Valgrind XML log')
-    parser.add_argument('upload_url',
-        help = 'Ceburasko URL for upload crash stack')
-    parser.add_argument('--timeout', type=int, default=10)
-    args = parser.parse_args()
-
-    for error in errors_from_xml_file(args.xml):
-        crash = ceburasko_crash(error)
-        request = urllib2.Request(args.upload_url, yaml.dump(crash), {'Content-Type': 'application/x-yaml'} )
-        response = urllib2.urlopen(request, timeout = args.timeout)
+def errors_from_valgrind_log(filename):
+    for valgrind_error in parse_valgrind(filename):
+        yield crash(valgrind_error)

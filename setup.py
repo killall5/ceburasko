@@ -13,7 +13,7 @@ def files(basedir, dirs):
 
 setup(
     name = 'ceburasko',
-    version = '1.9.2',
+    version = '2.0',
     description = 'Ceburasko Django app',
     long_description = 'Django application for store crashes',
     author = 'Alexey Tamarevskiy',
@@ -21,9 +21,11 @@ setup(
     packages = [ 'ceburasko' ],
     package_data = { 'ceburasko': list(files('ceburasko', ('static', 'templates'))) } ,
     scripts = [
-        'gdb-output-ceburasko-upload',
+        'ceburasko-exe-id',
+        'ceburasko-upload-binaries',
+        'ceburasko-upload-gdb-log',
+        'ceburasko-upload-valgrind-log',
         'ceburasko-valgrind',
-        'valgrind-xml-ceburasko-upload',
     ],
     license = "GPLv2",
 )

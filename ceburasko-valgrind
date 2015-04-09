@@ -7,6 +7,7 @@ import hashlib
 import tempfile
 import signal
 from argparse import ArgumentParser
+from ceburasko.exe_id import exe_id
 
 def main():
     parser = ArgumentParser()
@@ -20,11 +21,8 @@ def main():
         help = 'Your program args')
     args = parser.parse_args()
 
-    exec_hash = hashlib.new('sha256')
-    with open(args.program, 'r') as exec_file:
-        exec_hash.update(exec_file.read())
-    log_filename = tempfile.mkstemp(prefix='valgrind.', suffix='.log.xml', dir=args.valgrind_dir)[1]
-    binary_comment = 'sha256:%s' % exec_hash.hexdigest()
+    binary_comment = exe_id(args.program)
+    log_filename = tempfile.mkstemp(prefix='valgrind.', suffix='.log.part', dir=args.valgrind_dir)[1]
 
     valgrind = [ '/usr/bin/valgrind' ]
     valgrind += [ '--xml=yes', '--xml-file=%s' % log_filename ]
@@ -35,6 +33,8 @@ def main():
         process.wait()
     except KeyboardInterrupt as ki:
         process.send_signal(signal.SIGINT)
+        process.wait()
+    os.rename(log_filename, log_filename.replace('.log.part', '.log.xml'))
 
 if __name__ == '__main__':
     main()
