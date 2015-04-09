@@ -72,6 +72,11 @@ class SourcePath(Model):
     path_substring = CharField(max_length=255)
 
 
+class KindPriority(Model):
+    project = ForeignKey(Project)
+    kind = CharField(max_length=150)
+    priority = IntegerField(default=0)
+
 class Build(Model):
     project = ForeignKey(Project)
     version = VersionField()
@@ -91,25 +96,23 @@ class Issue(Model):
     project = ForeignKey(Project)
     title = CharField(max_length=200)
     description = TextField(null=True, blank=True)
+    kind = CharField(max_length=150)
     hash = CharField(max_length=150)
     fixed_version = VersionField(null=True)
+    first_affected_version = VersionField()
+    last_affected_version =  VersionField()
     is_fixed = BooleanField(default=False)
     created_time = DateTimeField(auto_now_add=True, blank=True)
-    modified_time = DateTimeField()
-    priority = IntegerField(default=0)
-
-
-class AccidentData(Model):
-    time = DateTimeField()
-    ip = IPAddressField()
-    description = TextField(null=True, blank=True)
+    modified_time = DateTimeField(auto_now_add=True, blank=True)
+    priority = IntegerField()
 
 
 class Accident(Model):
     issue = ForeignKey(Issue)
     build = ForeignKey(Build)
-    binary = ForeignKey(Binary)
-    accident_data = OneToOneField(AccidentData)
+    time = DateTimeField(auto_now_add=True, blank=True)
+    ip = IPAddressField()
+    annotation = TextField(null=True, blank=True)
 
 
 class Frame(Model):

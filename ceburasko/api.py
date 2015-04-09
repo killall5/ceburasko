@@ -19,6 +19,23 @@ def upload_binary_info(version, ids, project_url):
 
 
 def upload_errors(errors, project_url):
-    url = os.path.join(project_url, 'upload-crash/')
+    binaries = {}
+    # regroup by binary_id
     for error in errors:
-        upload_data(url, error)
+        if 'binary_id' not in error:
+            # skip unknown binary_id
+            continue
+        binary_id = error['binary_id']
+        del error['binary_id']
+        if binary_id not in binaries:
+            binaries[binary_id] = [error]
+        else:
+            binaries[binary_id].append(error)
+    payload = []
+    for binary_id, accidents in binaries.items():
+        payload.append({
+            'binary_id': binary_id,
+            'accidents': accidents,
+        })
+    url = os.path.join(project_url, 'upload-crash/')
+    return upload_data(url, payload)

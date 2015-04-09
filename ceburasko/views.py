@@ -8,6 +8,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 import yaml
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import hashlib
 
 """
  Helper for paginate source
@@ -103,17 +104,17 @@ def upload_binaries(request, project_id):
     except ObjectDoesNotExist as e:
         build = Build.objects.create(project=p, version=version, created_time=timezone.now())
         action = "created"
-    for exe_id, components in components.items():
+    for binary_id, components in components.items():
         if not components:
             continue
         component = components[0]
         try:
-            binary = Binary.objects.get(hash=exe_id)
+            binary = Binary.objects.get(hash=binary_id)
             binary.build = build
             binary.filename = component
             binary.save()
         except ObjectDoesNotExist as e:
-            Binary.objects.create(build=build, hash=exe_id, filename=components[0])
+            Binary.objects.create(build=build, hash=binary_id, filename=components[0])
     return HttpResponse("%s %s with %d binaries" % (build, action, build.binary_set.count()))
 
 """
@@ -125,9 +126,76 @@ def upload_accidents(request):
     payload = yaml.load(request.body)
     if not isinstance(payload, list):
         payload = [payload]
+    modified_issues = []
     for case in payload:
-        binary_id = case['exe']
+        try:
+            binary_id = case['binary_id']
+        except KeyError as e:
+            # No binary_id in accidents? Ignore.
+            continue
+        try:
+            affected_build = Binary.objects.get(hash=binary_id).build
+            project = affected_build.project
+        except ObjectDoesNotExist as e:
+            # Unknown binary? Ignore.
+            continue
+        for reported_accident in case['accidents']:
+            if 'kind' not in reported_accident:
+                continue
+            try:
+                priority_by_accident_kind = project.kindpriority_set.get(kind=reported_accident['kind']).priority
+            except ObjectDoesNotExist as e:
+                # Ignore accident kinds without priority
+                continue
+            significant_frame = None
+            for frame in reported_accident['stack']:
+                if 'file' not in frame or 'fn' not in frame:
+                    continue
+                for source_path in project.sourcepath_set.all():
+                    if source_path in frame['file']:
+                        significant_frame = frame
+                        break
+            if significant_frame is None:
+                # Unknown source? Ignore.
+                continue
+            search_hash = hashlib.md5()
+            search_hash.update(significant_frame['fn'])
+            search_hash = search_hash.hexdigest()
+            try:
+                issue = project.issue_set.filter(hash=search_hash, kind=reported_accident['kind'])[0]
+                issue.last_affected_version = max(issue.last_affected_version, affected_build.version)
+                modified_issues.append(issue)
+            except ObjectDoesNotExist as e:
+                issue = project.issue_set.create(
+                    hash=search_hash,
+                    kind=reported_accident['kind'],
+                    title="%s in %s" % (reported_accident['kind'], significant_frame['fn']),
+                    priority=priority_by_accident_kind,
+                    first_affected_version=affected_build.version,
+                    last_affected_version=affected_build.version,
+                )
 
+            accident = Accident(
+                issue=issue,
+                build=affected_build,
+                ip=request.META.get('REMOTE_ADDR')
+            )
+            if 'annotation' in reported_accident:
+                accident.annotation = reported_accident['annotation']
+            accident.save()
+
+            for i, frame in enumerate(reported_accident['stack']):
+                Frame.objects.create(accident=accident, pos=i, **frame)
+
+    # update all modified issues
+    modified_time = timezone.now()
+    for issue in modified_issues:
+        issue.modified_time = modified_time
+        # Reopen reproduced issues
+        if issue.is_fixed:
+            if issue.fixed_version <= issue.last_affected_version:
+                issue.is_fixed = False
+        issue.save()
 
 """
 TODO: Ooooold stuff
