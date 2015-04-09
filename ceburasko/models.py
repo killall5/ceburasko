@@ -131,10 +131,7 @@ class Frame(Model):
 
     @property
     def function(self):
-        if self.fn:
-            return self.fn
-        else:
-            return '??'
+        return self.fn if self.fn else '??'
 
 
 import urllib2
