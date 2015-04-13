@@ -24,9 +24,17 @@ class Version():
         return self.raw < other.raw
 
     def __eq__(self, other):
-        if not isinstance(other, Version):
+        if isinstance(other, Version):
+            return self.raw == other.raw
+        elif isinstance(other, tuple):
+            return self.raw == other
+        elif isinstance(other, list):
+            return self.raw == tuple(other)
+        elif other is None:
+            return False
+        else:
             raise NotImplementedError()
-        return self.raw == other.raw
+
 
     @property
     def major(self):

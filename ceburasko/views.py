@@ -118,7 +118,12 @@ def upload_binaries(request, project_id):
             binary.save()
         except ObjectDoesNotExist as e:
             Binary.objects.create(build=build, hash=binary_id, filename=components[0])
-    return HttpResponse("%s %s with %d binaries" % (build, action, build.binary_set.count()))
+    response = {
+        'action': action,
+        'version': str(build.version),
+        'binaries_count': build.binary_set.count(),
+    }
+    return HttpResponse(yaml.dump(response))
 
 
 """

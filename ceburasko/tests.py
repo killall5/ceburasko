@@ -6,15 +6,48 @@ Replace this with more appropriate tests for your application.
 """
 
 from django.test import TestCase, Client
+from models import *
+import yaml
 
 
 class UploadBinaryTest(TestCase):
     def setUp(self):
+        Project.objects.create(name='FooBar')
         self.client = Client()
 
-    def DISABLED_test_upload_new_binary(self):
-        response = self.client.post('/upload-binaries/')
+    def test_upload_new_binary(self):
+        payload = {
+            'version': '1.0.0.0',
+            'components': {
+                'fake:asdf': ['bin/moo', 'bin/foo', ],
+                'fake:asdfasdf': ['bin/foo2', ],
+            }
+        }
+        response = self.client.post('/crashes/project-1/upload-binaries/', yaml.dump(payload), content_type='application/yaml')
         self.assertEqual(response.status_code, 200)
+        response = yaml.load(response.content)
+        self.assertEqual(response['version'], '1.0.0.0')
+        self.assertEqual(response['binaries_count'], 2)
+
+    def test_upload_existing_binary(self):
+        payload = {
+            'version': '1.0.0.0',
+            'components': {
+                'fake:asdf': ['bin/moo', ],
+            }
+        }
+        response = self.client.post('/crashes/project-1/upload-binaries/', yaml.dump(payload), content_type='application/yaml')
+        self.assertEqual(response.status_code, 200)
+        payload = {
+            'version': '1.0.0.0',
+            'components': {
+                'fake:asdf': ['bin/foo', ],
+            }
+        }
+        response = self.client.post('/crashes/project-1/upload-binaries/', yaml.dump(payload), content_type='application/yaml')
+        self.assertEqual(response.status_code, 200)
+        response = yaml.load(response.content)
+        self.assertEqual(response['binaries_count'], 1)
 
 
 import gdb
@@ -46,10 +79,6 @@ class GdbParseTest(TestCase):
         errors = errors_from_gdb_log(self.basedir + 'data/02-001-gdb-unknown-binary-id.txt')
         errors = list(errors)
         self.assertEqual(len(errors), 0)
-
-
-from models import *
-import yaml
 
 
 class UploadAccidentTest(TestCase):
