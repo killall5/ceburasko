@@ -10,7 +10,7 @@ class Version():
         elif isinstance(value, tuple) or isinstance(value, list):
             self.raw = tuple(value[:4])
         else:
-            self.raw = map(int, value.split('.'))
+            self.raw = tuple(map(int, value.split('.')))
 
     def __str__(self):
         return '.'.join(map(str, self.raw))
@@ -22,6 +22,11 @@ class Version():
         if not isinstance(other, Version):
             raise NotImplementedError()
         return self.raw < other.raw
+
+    def __eq__(self, other):
+        if not isinstance(other, Version):
+            raise NotImplementedError()
+        return self.raw == other.raw
 
     @property
     def major(self):
@@ -77,6 +82,7 @@ class KindPriority(Model):
     kind = CharField(max_length=150)
     priority = IntegerField(default=0)
 
+
 class Build(Model):
     project = ForeignKey(Project)
     version = VersionField()
@@ -100,7 +106,7 @@ class Issue(Model):
     hash = CharField(max_length=150)
     fixed_version = VersionField(null=True)
     first_affected_version = VersionField()
-    last_affected_version =  VersionField()
+    last_affected_version = VersionField()
     is_fixed = BooleanField(default=False)
     created_time = DateTimeField(auto_now_add=True, blank=True)
     modified_time = DateTimeField(auto_now_add=True, blank=True)

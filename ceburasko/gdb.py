@@ -24,14 +24,16 @@ def parse_stack(data):
         yield result.groupdict()
 
 
-def parse_gdb(istream):
+def parse_gdb(input_stream):
     state = 0
     crash = {}
-    for line in istream:
+    for line in input_stream:
+        line = line.strip()
         if state == 0:
             if line.startswith("Program terminated"):
                 state = 1
-                crash['kind'] = line
+                crash['kind'] = 'killed'
+                crash['subtype'] = line
                 continue
         if state == 1:
             crash['line'] = line
@@ -76,9 +78,11 @@ def errors_from_gdb_log(filename):
         # gdb log must be prepended with exe ids
         return
 
+    if binary_id is None:
+        return
+
     annotation = '\n'.join(log)
     for error in parse_gdb(log):
         error['annotation'] = annotation
-        if binary_id:
-            error['binary_id'] = binary_id
+        error['binary_id'] = binary_id
         yield error

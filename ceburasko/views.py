@@ -2,7 +2,7 @@
 
 from django.shortcuts import get_object_or_404, render_to_response
 from ceburasko.models import *
-from django.db.models import Count
+# from django.db.models import Count
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseRedirect
 import yaml
@@ -39,6 +39,7 @@ def project_list(request):
         p.fixed_issues = p.issue_set.count() - p.opened_issues
     return render_to_response('ceburasko/project.html', {'projects': projects})
 
+
 """
  Project details page
 
@@ -57,33 +58,35 @@ def project_details(request, project_id):
     builds = p.build_set.all()[:5]
 
     return render_to_response('ceburasko/project_details.html',
-        {
-         'project': p,
-         'opened_issues': opened_issues,
-         'opened_issues_count': opened_issues_count,
-         'fixed_issues': fixed_issues,
-         'fixed_issues_count': fixed_issues_count,
-         'builds': builds,
-        }
-    )
+                              {
+                                  'project': p,
+                                  'opened_issues': opened_issues,
+                                  'opened_issues_count': opened_issues_count,
+                                  'fixed_issues': fixed_issues,
+                                  'fixed_issues_count': fixed_issues_count,
+                                  'builds': builds,
+                              }
+                              )
+
 
 """
  Project issues list
 """
 
 
-def issue_list(request, project_id, is_fixed = False):
-    p = get_object_or_404(Project, pk = project_id)
-    issues = p.issue_set.filter(is_fixed = is_fixed)
+def issue_list(request, project_id, is_fixed=False):
+    p = get_object_or_404(Project, pk=project_id)
+    issues = p.issue_set.filter(is_fixed=is_fixed)
     issues_paged = get_paginator(issues, 10, request.GET.get('page'))
 
     return render_to_response('ceburasko/issue_list.html',
-        {
-            'is_fixed': is_fixed,
-            'project': p,
-            'issues': issues_paged,
-        }
-    )
+                              {
+                                  'is_fixed': is_fixed,
+                                  'project': p,
+                                  'issues': issues_paged,
+                              }
+                              )
+
 
 """
  Upload new binary info
@@ -117,9 +120,11 @@ def upload_binaries(request, project_id):
             Binary.objects.create(build=build, hash=binary_id, filename=components[0])
     return HttpResponse("%s %s with %d binaries" % (build, action, build.binary_set.count()))
 
+
 """
  Batch upload accidents
 """
+
 
 @csrf_exempt
 def upload_accidents(request):
@@ -127,36 +132,54 @@ def upload_accidents(request):
     if not isinstance(payload, list):
         payload = [payload]
     modified_issues = []
+    responses = []
     for case in payload:
+        response = {}
         try:
             binary_id = case['binary_id']
         except KeyError as e:
             # No binary_id in accidents? Ignore.
+            response['action'] = 'ignored'
+            response['reason'] = 'no binary_id key'
+            responses.append(response)
             continue
         try:
             affected_build = Binary.objects.get(hash=binary_id).build
             project = affected_build.project
         except ObjectDoesNotExist as e:
             # Unknown binary? Ignore.
+            response['action'] = 'ignored'
+            response['reason'] = 'unknown binary'
+            responses.append(response)
             continue
         for reported_accident in case['accidents']:
+            response = {}
             if 'kind' not in reported_accident:
+                response['action'] = 'ignored'
+                response['reason'] = 'no kind key'
+                responses.append(response)
                 continue
             try:
                 priority_by_accident_kind = project.kindpriority_set.get(kind=reported_accident['kind']).priority
             except ObjectDoesNotExist as e:
                 # Ignore accident kinds without priority
+                response['action'] = 'ignored'
+                response['reason'] = 'unknown kind'
+                responses.append(response)
                 continue
             significant_frame = None
             for frame in reported_accident['stack']:
                 if 'file' not in frame or 'fn' not in frame:
                     continue
                 for source_path in project.sourcepath_set.all():
-                    if source_path in frame['file']:
+                    if source_path.path_substring in frame['file']:
                         significant_frame = frame
                         break
             if significant_frame is None:
                 # Unknown source? Ignore.
+                response['action'] = 'ignored'
+                response['reason'] = 'unknown source'
+                responses.append(response)
                 continue
             search_hash = hashlib.md5()
             search_hash.update(significant_frame['fn'])
@@ -165,7 +188,7 @@ def upload_accidents(request):
                 issue = project.issue_set.filter(hash=search_hash, kind=reported_accident['kind'])[0]
                 issue.last_affected_version = max(issue.last_affected_version, affected_build.version)
                 modified_issues.append(issue)
-            except ObjectDoesNotExist as e:
+            except (ObjectDoesNotExist, IndexError) as e:
                 issue = project.issue_set.create(
                     hash=search_hash,
                     kind=reported_accident['kind'],
@@ -174,6 +197,10 @@ def upload_accidents(request):
                     first_affected_version=affected_build.version,
                     last_affected_version=affected_build.version,
                 )
+            response['action'] = 'accepted'
+            response['issue'] = issue.id
+            response['project'] = issue.project.id
+            responses.append(response)
 
             accident = Accident(
                 issue=issue,
@@ -196,6 +223,8 @@ def upload_accidents(request):
             if issue.fixed_version <= issue.last_affected_version:
                 issue.is_fixed = False
         issue.save()
+    return HttpResponse(yaml.dump(responses))
+
 
 """
 TODO: Ooooold stuff
@@ -204,7 +233,7 @@ TODO: Ooooold stuff
 
 @csrf_exempt
 def upload_crash(request, project_id):
-    p = get_object_or_404(Project, pk = project_id)
+    p = get_object_or_404(Project, pk=project_id)
     crash = yaml.load(request.body)
     stack = [Frame(pos=i, **frame) for i, frame in enumerate(crash['stack'])]
     fn_max_length = Frame._meta.get_field('fn').max_length
@@ -214,23 +243,24 @@ def upload_crash(request, project_id):
     description = '\n'.join([f.function for f in stack])
     stack_hash = Issue.generate_hash(stack)
     try:
-        issue = p.issue_set.get(hash = stack_hash)
+        issue = p.issue_set.get(hash=stack_hash)
         issue.modified = timezone.now()
     except:
-        issue = Issue.objects.create(hash = stack_hash, project = p, modified = timezone.now(), created = timezone.now(), description = description)
+        issue = Issue.objects.create(hash=stack_hash, project=p, modified=timezone.now(), created=timezone.now(),
+                                     description=description)
         try:
             issue.title = '#%d %s in %s' % (issue.id, crash['kind'], stack[0].function)
         except:
             issue.title = 'Issue #%d' % issue.id
         issue.title = issue.title[:Issue._meta.get_field('title').max_length]
 
-    cr_params = { 'ip': request.META.get('REMOTE_ADDR') }
-    for param in [ 'kind', 'component', 'version', 'annotation' ]:
+    cr_params = {'ip': request.META.get('REMOTE_ADDR')}
+    for param in ['kind', 'component', 'version', 'annotation']:
         if param in crash:
             cr_params[param] = crash[param]
     cr = CrashReport.objects.create(
-        issue = issue,
-        datetime = timezone.now(),
+        issue=issue,
+        datetime=timezone.now(),
         **cr_params)
     for frame in stack:
         frame.crashreport_id = cr.id
@@ -240,7 +270,7 @@ def upload_crash(request, project_id):
     issue.update_status()
     issue.save()
 
-    return HttpResponse("issue id %s, fixed: %s" % (issue.id, issue.status) )
+    return HttpResponse("issue id %s, fixed: %s" % (issue.id, issue.status))
 
 
 from django.template import RequestContext
@@ -259,20 +289,23 @@ def issue_details(request, issue_id):
         foreign_tracker.issue_url = foreign_issue.url
 
     crashes = get_paginator(issue.crashreport_set.order_by('-datetime'), 25, request.GET.get('page'))
-    return render_to_response('ceburasko/issue_details.html', 
-        { 'issue': issue, 'foreign_trackers': foreign_trackers.values(), 'crashes': crashes, },
-        context_instance=RequestContext(request))
+    return render_to_response('ceburasko/issue_details.html',
+                              {'issue': issue, 'foreign_trackers': foreign_trackers.values(), 'crashes': crashes, },
+                              context_instance=RequestContext(request))
+
 
 def crash_details(request, crash_id):
-    crashreport = get_object_or_404(CrashReport, pk = crash_id)
+    crashreport = get_object_or_404(CrashReport, pk=crash_id)
     stack = crashreport.frame_set.order_by('pos').all()
-    return render_to_response('ceburasko/crash_details.html', { 'crashreport': crashreport, 'stack': stack })
+    return render_to_response('ceburasko/crash_details.html', {'crashreport': crashreport, 'stack': stack})
+
 
 from django.core.urlresolvers import reverse
 
+
 def issue_modify(request, issue_id):
-    issue = get_object_or_404(Issue, pk = issue_id)
-    issue.modified = timezone.now() 
+    issue = get_object_or_404(Issue, pk=issue_id)
+    issue.modified = timezone.now()
     issue.title = request.POST['title']
     issue.fixed_version = request.POST['fixed_version']
     issue.update_status()
@@ -281,22 +314,23 @@ def issue_modify(request, issue_id):
             if request.POST['tracker%d' % tracker.id]:
                 key = request.POST['tracker%d' % tracker.id]
                 try:
-                    foreign_issue = issue.foreignissue_set.get(tracker = tracker)
+                    foreign_issue = issue.foreignissue_set.get(tracker=tracker)
                     foreign_issue.key = key
                     foreign_issue.save()
                 except:
-                    foreign_issue = ForeignIssue.objects.create(tracker = tracker, issue = issue, key = key)
+                    foreign_issue = ForeignIssue.objects.create(tracker=tracker, issue=issue, key=key)
             else:
                 try:
-                    foreign_issue = issue.foreignissue_set.get(tracker = tracker)
+                    foreign_issue = issue.foreignissue_set.get(tracker=tracker)
                     foreign_issue.delete()
                 except:
                     pass
     issue.save()
-    return HttpResponseRedirect(reverse('ceburasko:issue_details', args = (issue.id, )))
+    return HttpResponseRedirect(reverse('ceburasko:issue_details', args=(issue.id, )))
+
 
 def issue_delete(request, issue_id):
-    issue = get_object_or_404(Issue, pk = issue_id)
+    issue = get_object_or_404(Issue, pk=issue_id)
     project_id = issue.project.id
     issue.delete()
-    return HttpResponseRedirect(reverse('ceburasko:project_details', args = (project_id, )))
+    return HttpResponseRedirect(reverse('ceburasko:project_details', args=(project_id, )))
