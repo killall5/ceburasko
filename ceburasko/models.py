@@ -124,6 +124,7 @@ class Issue(Model):
 class Accident(Model):
     issue = ForeignKey(Issue)
     build = ForeignKey(Build)
+    binary = ForeignKey(Binary)
     time = DateTimeField(auto_now_add=True, blank=True)
     ip = IPAddressField()
     annotation = TextField(null=True, blank=True)

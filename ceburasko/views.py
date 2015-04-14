@@ -149,7 +149,8 @@ def upload_accidents(request):
             responses.append(response)
             continue
         try:
-            affected_build = Binary.objects.get(hash=binary_id).build
+            affected_binary = Binary.objects.get(hash=binary_id)
+            affected_build = affected_binary.build
             project = affected_build.project
         except ObjectDoesNotExist as e:
             # Unknown binary? Ignore.
@@ -210,6 +211,7 @@ def upload_accidents(request):
             accident = Accident(
                 issue=issue,
                 build=affected_build,
+                binary=affected_binary,
                 ip=request.META.get('REMOTE_ADDR')
             )
             if 'annotation' in reported_accident:
