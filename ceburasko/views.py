@@ -7,6 +7,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 import yaml
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.urlresolvers import reverse
+from django.template import RequestContext
+from django.db.models import Count
 import hashlib
 
 """
@@ -36,7 +39,11 @@ def project_list(request):
     for p in projects:
         p.opened_issues = p.issue_set.filter(is_fixed=False).count()
         p.fixed_issues = p.issue_set.count() - p.opened_issues
-    return render_to_response('ceburasko/project.html', {'projects': projects})
+    return render_to_response(
+        'ceburasko/project_list.html',
+        {'projects': projects},
+        context_instance=RequestContext(request)
+    )
 
 
 """
@@ -48,24 +55,26 @@ def project_list(request):
 
 def project_details(request, project_id):
     p = get_object_or_404(Project, pk=project_id)
-    opened_issues = p.issue_set.filter(is_fixed=False).all()
+    opened_issues = p.issue_set.filter(is_fixed=False).annotate(accidents=Count('accident'))
     opened_issues_count = len(opened_issues)
     opened_issues = opened_issues[:5]
-    fixed_issues = p.issue_set.filter(is_fixed=True).all()
+    fixed_issues = p.issue_set.filter(is_fixed=True).annotate(accidents=Count('accident'))
     fixed_issues_count = len(fixed_issues)
     fixed_issues = fixed_issues[:5]
     builds = p.build_set.all()[:5]
 
-    return render_to_response('ceburasko/project_details.html',
-                              {
-                                  'project': p,
-                                  'opened_issues': opened_issues,
-                                  'opened_issues_count': opened_issues_count,
-                                  'fixed_issues': fixed_issues,
-                                  'fixed_issues_count': fixed_issues_count,
-                                  'builds': builds,
-                              }
-                              )
+    return render_to_response(
+        'ceburasko/project_details.html',
+        {
+            'project': p,
+            'opened_issues': opened_issues,
+            'opened_issues_count': opened_issues_count,
+            'fixed_issues': fixed_issues,
+            'fixed_issues_count': fixed_issues_count,
+            'builds': builds,
+        },
+        context_instance=RequestContext(request)
+    )
 
 
 """
@@ -75,16 +84,47 @@ def project_details(request, project_id):
 
 def issue_list(request, project_id, is_fixed=False):
     p = get_object_or_404(Project, pk=project_id)
-    issues = p.issue_set.filter(is_fixed=is_fixed)
-    issues_paged = get_paginator(issues, 10, request.GET.get('page'))
+    issues = p.issue_set.filter(is_fixed=is_fixed).annotate(accidents=Count('accident'))
+    issues_paged = get_paginator(issues, 1, request.GET.get('page'))
 
-    return render_to_response('ceburasko/issue_list.html',
-                              {
-                                  'is_fixed': is_fixed,
-                                  'project': p,
-                                  'issues': issues_paged,
-                              }
-                              )
+    return render_to_response(
+        'ceburasko/issue_list.html',
+         {
+             'is_fixed': is_fixed,
+             'project': p,
+             'issues': issues_paged,
+         },
+         context_instance=RequestContext(request)
+    )
+
+"""
+ Project builds list
+"""
+
+
+def build_list(request, project_id):
+    p = get_object_or_404(Project, pk=project_id)
+    builds_paged = get_paginator(p.build_set, 25, request.GET.get('page'))
+
+    return render_to_response(
+        'ceburasko/build_list.html',
+        {'project': p, 'builds': builds_paged},
+        context_instance=RequestContext(request)
+    )
+
+
+"""
+ Build details
+"""
+
+
+def build_details(request, build_id):
+    build = get_object_or_404(Build, pk=build_id)
+    return render_to_response(
+        'ceburasko/build_details.html',
+        {'build': build},
+        context_instance=RequestContext(request)
+    )
 
 
 """
@@ -232,9 +272,6 @@ def upload_accidents(request):
     return HttpResponse(yaml.dump(responses))
 
 
-from django.template import RequestContext
-
-
 def issue_details(request, issue_id):
     issue = get_object_or_404(Issue, pk=issue_id)
     # FIXME: needs left join
@@ -248,29 +285,35 @@ def issue_details(request, issue_id):
         foreign_tracker.issue_url = foreign_issue.url
 
     accidents = get_paginator(issue.accident_set.order_by('-datetime'), 25, request.GET.get('page'))
-    return render_to_response('ceburasko/issue_details.html',
-                              {'issue': issue, 'foreign_trackers': foreign_trackers.values(), 'accidents': accidents, },
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'ceburasko/issue_details.html',
+        {'issue': issue, 'foreign_trackers': foreign_trackers.values(), 'accidents': accidents, },
+        context_instance=RequestContext(request)
+    )
 
 
 def accident_details(request, accident_id):
     accident = get_object_or_404(Accident, pk=accident_id)
-
-def crash_details(request, crash_id):
-    crashreport = get_object_or_404(CrashReport, pk=crash_id)
-    stack = crashreport.frame_set.order_by('pos').all()
-    return render_to_response('ceburasko/crash_details.html', {'crashreport': crashreport, 'stack': stack})
-
-
-from django.core.urlresolvers import reverse
+    return render_to_response(
+        'ceburasko/accident_details.html',
+        {'accident': accident},
+        context_instance=RequestContext(request)
+    )
 
 
 def issue_modify(request, issue_id):
     issue = get_object_or_404(Issue, pk=issue_id)
     issue.modified = timezone.now()
     issue.title = request.POST['title']
-    issue.fixed_version = request.POST['fixed_version']
-    issue.update_status()
+    # issue.description = request.POST['description']
+    issue.priority = request.POST['priority']
+    if request.POST['fixed_version']:
+        issue.fixed_version = Version(request.POST['fixed_version'])
+        issue.is_fixed = not issue.fixed_version <= issue.last_affected_version
+
+    else:
+        issue.fixed_version = None
+        issue.is_fixed = False
     for tracker in ForeignTracker.objects.all():
         if 'tracker%d' % tracker.id in request.POST:
             if request.POST['tracker%d' % tracker.id]:
@@ -279,14 +322,15 @@ def issue_modify(request, issue_id):
                     foreign_issue = issue.foreignissue_set.get(tracker=tracker)
                     foreign_issue.key = key
                     foreign_issue.save()
-                except:
-                    foreign_issue = ForeignIssue.objects.create(tracker=tracker, issue=issue, key=key)
+                except ObjectDoesNotExist as e:
+                    ForeignIssue.objects.create(tracker=tracker, issue=issue, key=key)
             else:
                 try:
                     foreign_issue = issue.foreignissue_set.get(tracker=tracker)
                     foreign_issue.delete()
-                except:
+                except ObjectDoesNotExist as e:
                     pass
+    issue.modified = timezone.now()
     issue.save()
     return HttpResponseRedirect(reverse('ceburasko:issue_details', args=(issue.id, )))
 
@@ -296,3 +340,4 @@ def issue_delete(request, issue_id):
     project_id = issue.project.id
     issue.delete()
     return HttpResponseRedirect(reverse('ceburasko:project_details', args=(project_id, )))
+

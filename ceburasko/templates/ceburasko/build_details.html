@@ -1,0 +1,20 @@
+{% extends "ceburasko/base.html" %}
+{% load url from future %}
+
+{% block title %} {{ build }} &mdash; {{ build.project }} &mdash; Ceburasko {% endblock %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+    <li><a href="{% url 'ceburasko:projects' %}">Projects</a></li>
+    <li><a href="{% url 'ceburasko:project_details' build.project.id %}">{{ build.project }}</a></li>
+    <li class="active">{{ build }}</li>
+</ol>
+{% endblock breadcrumbs %}
+
+{% block body %}
+<h1>Build {{ build }}</h1>
+
+<p>Opened issues: {{ opened_issues }}</p>
+
+<p>Fixed issues: {{ fixed_issues }}</p>
+{% endblock body%}

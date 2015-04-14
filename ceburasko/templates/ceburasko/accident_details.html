@@ -1,0 +1,55 @@
+{% extends "ceburasko/base.html" %}
+{% load url from future %}
+
+{% block title %} {{ accident }} &mdash; {{ accident.issue }} &mdash; {{ accident.issue.project }} &mdash; Ceburasko {% endblock %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+    <li><a href="{% url 'ceburasko:projects' %}">Projects</a></li>
+    <li><a href="{% url 'ceburasko:project_details' accident.issue.project.id %}">{{ accident.issue.project }}</a></li>
+    <li><a href="{% url 'ceburasko:issue_details' accident.issue.id %}">{{ accident.issue }}</a></li>
+    <li class="active">{{ accident }}</li>
+</ol>
+{% endblock breadcrumbs %}
+
+{% block body %}
+<h2>{{accident}}</h2>
+
+<div class="row">
+
+</div>
+
+<div class="row">
+    <div class="col-md-2 text-muted">Build:</div>
+    <div class="col-md-4">{{accident.build}}</div>
+
+    <div class="col-md-2 text-muted">Binary:</div>
+    <div class="col-md-4">{{accident.binary}}</div>
+</div>
+
+<div class="row">
+    <div class="col-md-2 text-muted">Date:</div>
+    <div class="col-md-4">{{accident.datetime|date:"Y-m-d H:i:s"}}</div>
+
+    <div class="col-md-2 text-muted">IP:</div>
+    <div class="col-md-4">{{accident.ip}}</div>
+</div>
+
+<h2>Stack trace</h2>
+
+<div class="list-group">
+{%for frame in accident.stack.all%}
+    <a class="list-group-item">
+        <samp>#{{frame.pos}} {{frame.function}}</samp>
+        {% if frame.file %}
+        <br /><small class="text-muted">at {{frame.file}}:{{frame.line}}</small>
+        {%endif%}
+    </a>
+{%endfor%}
+</div>
+
+{% if accident.annotation %}
+<h2>Annotation</h2>
+<pre>{{accident.annotation|linebreaks}}</pre>
+{% endif %}
+{% endblock body %}

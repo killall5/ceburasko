@@ -1,0 +1,6 @@
+{% load add_get_parameter %}
+{%if request.GET.order == key and request.GET.dir != 'desc' %}
+<a href="{%add_get order=key dir='desc'%}">{{title}}</a>
+{% else %}
+<a href="{%add_get order=key dir='asc'%}">{{title}}</a>
+{% endif %}

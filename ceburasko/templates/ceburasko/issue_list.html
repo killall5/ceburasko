@@ -15,39 +15,13 @@
 {% block body %}
 <h1>{%include "ceburasko/issue_type_snippet.html"%} issues <small>{{issues.paginator.count}} total</small></h1>
 
-<table class="table table-striped">
-    <tr>
-        <th>#</th>
-        <th>Summary</th>
-        <th>Foreign</th>
-        <th>Accidents</th>
-        <th>Updated</th>
-        <th>Latest version</th>
-    </tr>
-    {% for issue in issues %}
-    <tr>
-        <td>{{ issue.id }}</td>
-        <td><a href="{% url 'ceburasko:issue_details' issue.id %}">{{ issue }}</a></td>
-        <td>{% for fi in issue.foreignissue_set.all %}<a href="{{fi.url}}">{{fi.key}}</a> {%endfor%}</td>
-        <td>{{ issue.accident_set.count }}</td>
-        <td>{{ issue.modified_time|date:'Y-m-d H:i:s' }}</td>
-        <td>?</td>
-    </tr>
-    {% endfor %}
-</table>
+{% if is_fixed %}
+    {% include "ceburasko/fixed_issues_snippet.html" %}
+{% else %}
+    {% include "ceburasko/opened_issues_snippet.html" %}
+{% endif %}
 
-<nav>
-    <ul class="pagination">
-        {% for i in issues.paginator.page_range %}
-            {% if i == issues.number %}
-                <li class="active"><a href="#">{{i}}</a></li>
-            {% else %}
-                <li><a href="?page={{i}}">{{i}}</a></li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-</nav>
-
+{% include "ceburasko/paginator_snippet.html" with page=issues %}
 
 {% endblock %}
 

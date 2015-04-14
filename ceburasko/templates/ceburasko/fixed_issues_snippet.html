@@ -1,0 +1,22 @@
+<table class="table table-striped">
+    <tr>
+        <th>Priority</th>
+        <th>Summary</th>
+        <th>Foreign</th>
+        <th>Accidents</th>
+        <th>Updated</th>
+        <th>Last version</th>
+        <th>Fixed version</th>
+    </tr>
+    {% for issue in issues %}
+    <tr>
+        <td>{{ issue.priority }}</td>
+        <td><a href="{% url 'ceburasko:issue_details' issue.id %}">{{ issue }}</a></td>
+        <td>{% for fi in issue.foreignissue_set.all %}<a href="{{fi.url}}">{{fi.key}}</a> {%endfor%}</td>
+        <td>{{ issue.accidents }}</td>
+        <td>{{ issue.modified_time|date:'Y-m-d H:i:s' }}</td>
+        <td>{{ issue.first_affected_version }}</td>
+        <td>{{ issue.last_affected_version }}</td>
+    </tr>
+    {% endfor %}
+</table>

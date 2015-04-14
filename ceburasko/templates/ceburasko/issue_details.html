@@ -5,7 +5,7 @@
 
 {% block breadcrumbs %}
 <ol class="breadcrumb">
-    <li><a href="{% url 'ceburasko:index' %}">Projects</a></li>
+    <li><a href="{% url 'ceburasko:projects' %}">Projects</a></li>
     <li><a href="{% url 'ceburasko:project_details' issue.project.id %}">{{ issue.project }}</a></li>
     <li class="active">{{issue}}</li>
 </ol>
@@ -20,13 +20,25 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="col-md-3 col-xs-3 control-label">Crashes</label>
+        <label for="priority" class="col-md-3 col-xs-3 control-label">Priority</label>
         <div class="col-md-3 col-xs-5">
-            <p class="form-control-static">{{ issue.crashreport_set.count }}</p>
+            <input type="input" class="form-control" id="priority" name="priority" value="{{ issue.priority }}"/>
         </div>
     </div>
     <div class="form-group">
-        <label class="col-md-3 col-xs-3 control-label">Last affected</label>
+        <label class="col-md-3 col-xs-3 control-label">Accidents</label>
+        <div class="col-md-3 col-xs-5">
+            <p class="form-control-static">{{ issue.accident_set.count }}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-3 col-xs-3 control-label">First affected version</label>
+        <div class="col-md-3 col-xs-5">
+            <p class="form-control-static">{{ issue.first_affected_version }}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-3 col-xs-3 control-label">Last affected version</label>
         <div class="col-md-3 col-xs-5">
             <p class="form-control-static">{{ issue.last_affected_version }}</p>
         </div>
@@ -37,7 +49,7 @@
             <input type="input" class="form-control" id="fixed_version" name="fixed_version" value="{%if issue.fixed_version%}{{ issue.fixed_version }}{%endif%}"/>
         </div>
         <p class="help-block">
-        {% if issue.status %}
+        {% if issue.is_fixed %}
             <span class="label label-success">Fixed</span>
         {% else %}
             <span class="label label-danger">Not fixed</span>
@@ -70,41 +82,27 @@
     </div>
 </form>
 
-<h2>Description</h2>
-
-<pre>{{ issue.description|linebreaksbr }}</pre>
-        
-<h2>Crash reports</h2>
+<h2>Accidents</h2>
 
 <table class="table table-striped">
     <tr>
         <th>#</th>
         <th>Date</th>
-        <th>Kind</th>
         <th>IP address</th>
-        <th>Component</th>
-        <th>Version</th>
+        <th>Build</th>
+        <th>Binary</th>
     </tr>
-{% for crash in crashes %}
+{% for accident in accidents %}
     <tr>
-        <td><a href="{%url 'ceburasko:crash_details' crash.id %}">{{ crash.id }}</a></td>
-        <td>{{ crash.datetime|date:"Y-m-d H:i:s" }}</td>
-        <td>{{ crash.kind }}</td>
-        <td>{{ crash.ip }}</td>
-        <td>{{ crash.component }}</td>
-        <td>{{ crash.version }}</td>
+        <td><a href="{%url 'ceburasko:accident_details' accident.id %}">#{{ accident.id }}</a></td>
+        <td><a href="{%url 'ceburasko:accident_details' accident.id %}">{{ accident.datetime|date:"Y-m-d H:i:s" }}</a></td>
+        <td>{{ accident.ip }}</td>
+        <td>{{ accident.build }}</td>
+        <td>{{ accident.binary }}</td>
     </tr>
 {% endfor %}
 </table>
 
-<nav class="center-block">
-    <ul class="pagination">
-{% for i in crashes.paginator.page_range %}
-    {% if i == crashes.number %}
-        <li class="active"><a href="#">{{i}}</a></li>
-    {% else %}
-        <li><a href="?page={{i}}">{{i}}</a></li>
-    {% endif %}
-{% endfor %}
-</nav>
+{% include "ceburasko/paginator_snippet.html" with page=accidents %}
+
 {% endblock %}

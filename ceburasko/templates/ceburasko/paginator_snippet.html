@@ -1,0 +1,13 @@
+{% load add_get_parameter %}
+
+<nav>
+    <ul class="pagination">
+        {% for i in page.paginator.page_range %}
+            {% if i == page.number %}
+                <li class="active"><a href="#">{{i}}</a></li>
+            {% else %}
+                <li><a href="{%add_get page=i%}">{{i}}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</nav>

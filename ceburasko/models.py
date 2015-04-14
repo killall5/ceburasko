@@ -1,76 +1,5 @@
 from django.db.models import *
-from django.utils import timezone
-from django.utils.six import with_metaclass
-
-
-class Version():
-    def __init__(self, value=None):
-        if value is None:
-            self.raw = tuple()
-        elif isinstance(value, tuple) or isinstance(value, list):
-            self.raw = tuple(value[:4])
-        else:
-            self.raw = tuple(map(int, value.split('.')))
-
-    def __str__(self):
-        return '.'.join(map(str, self.raw))
-
-    def __unicode__(self):
-        return self.__str__()
-
-    def __lt__(self, other):
-        if not isinstance(other, Version):
-            raise NotImplementedError()
-        return self.raw < other.raw
-
-    def __eq__(self, other):
-        if isinstance(other, Version):
-            return self.raw == other.raw
-        elif isinstance(other, tuple):
-            return self.raw == other
-        elif isinstance(other, list):
-            return self.raw == tuple(other)
-        elif other is None:
-            return False
-        else:
-            raise NotImplementedError()
-
-
-    @property
-    def major(self):
-        return self.raw[0]
-
-    @property
-    def minor(self):
-        return self.raw[1]
-
-    @property
-    def bugfix(self):
-        return self.raw[2]
-
-    @property
-    def build(self):
-        return self.raw[3]
-
-
-class VersionField(with_metaclass(SubfieldBase, IntegerField)):
-    def db_type(self, connection):
-        return 'bigint'  # Note this won't work with Oracle.
-
-    def to_python(self, value):
-        if isinstance(value, Version):
-            return value
-        if value is None:
-            return None
-        value, build  = value/1000000, value%1000000
-        value, bugfix = value/10000,   value%10000
-        major, minor  = value/10000,   value%10000
-        return Version((major, minor, bugfix, build))
-
-    def get_prep_value(self, value):
-        if value is None:
-            return None
-        return value.build + 1000000*(value.bugfix + 10000*(value.minor + 10000*value.major))
+from version_field import *
 
 
 class Project(Model):
@@ -91,21 +20,6 @@ class KindPriority(Model):
     priority = IntegerField(default=0)
 
 
-class Build(Model):
-    project = ForeignKey(Project)
-    version = VersionField()
-    created_time = DateTimeField(auto_now_add=True, blank=True)
-
-    def __unicode__(self):
-        return 'Build %s' % (self.version, )
-
-
-class Binary(Model):
-    build = ForeignKey(Build)
-    hash = CharField(max_length=150)
-    filename = CharField(max_length=255)
-
-
 class Issue(Model):
     project = ForeignKey(Project)
     title = CharField(max_length=200)
@@ -120,6 +34,32 @@ class Issue(Model):
     modified_time = DateTimeField(auto_now_add=True, blank=True)
     priority = IntegerField()
 
+    class Meta:
+        ordering = ['-priority']
+
+    def __unicode__(self):
+        return self.title if self.title else "Issue #%d" % (self.id, )
+
+
+class Build(Model):
+    project = ForeignKey(Project)
+    version = VersionField()
+    created_time = DateTimeField(auto_now_add=True, blank=True)
+    issues = ManyToManyField(Issue, through='Accident')
+
+    def __unicode__(self):
+        return '%s' % (self.version, )
+
+
+class Binary(Model):
+    build = ForeignKey(Build)
+    hash = CharField(max_length=150)
+    filename = CharField(max_length=255)
+    issues = ManyToManyField(Issue, through='Accident')
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.filename, self.hash)
+
 
 class Accident(Model):
     issue = ForeignKey(Issue)
@@ -129,14 +69,18 @@ class Accident(Model):
     ip = IPAddressField()
     annotation = TextField(null=True, blank=True)
 
+    def __unicode__(self):
+        return "Accident #%d" % (self.id, )
 
 class Frame(Model):
-    accident = ForeignKey(Accident)
+    accident = ForeignKey(Accident, related_name='stack')
     pos = IntegerField()
     fn = TextField(null=True, blank=True)
     file = TextField(null=True, blank=True)
     line = IntegerField(null=True)
-    ordering = ['pos']
+
+    class Meta:
+        ordering = ['pos']
 
     def __unicode__(self):
         return '#%d %s%s' % (
@@ -193,7 +137,7 @@ class ForeignTracker(Model):
 
 
 class ForeignIssue(Model):
-    key = CharField(max_length = 40)
+    key = CharField(max_length=40)
     tracker = ForeignKey(ForeignTracker)
     issue = ForeignKey(Issue)
 
