@@ -125,7 +125,7 @@ class Accident(Model):
     issue = ForeignKey(Issue)
     build = ForeignKey(Build)
     binary = ForeignKey(Binary)
-    time = DateTimeField(auto_now_add=True, blank=True)
+    datetime = DateTimeField(auto_now_add=True, blank=True)
     ip = IPAddressField()
     annotation = TextField(null=True, blank=True)
 
@@ -136,6 +136,7 @@ class Frame(Model):
     fn = TextField(null=True, blank=True)
     file = TextField(null=True, blank=True)
     line = IntegerField(null=True)
+    ordering = ['pos']
 
     def __unicode__(self):
         return '#%d %s%s' % (

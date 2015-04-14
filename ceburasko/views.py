@@ -2,7 +2,6 @@
 
 from django.shortcuts import get_object_or_404, render_to_response
 from ceburasko.models import *
-# from django.db.models import Count
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseRedirect
 import yaml
@@ -233,53 +232,6 @@ def upload_accidents(request):
     return HttpResponse(yaml.dump(responses))
 
 
-"""
-TODO: Ooooold stuff
-"""
-
-
-@csrf_exempt
-def upload_crash(request, project_id):
-    p = get_object_or_404(Project, pk=project_id)
-    crash = yaml.load(request.body)
-    stack = [Frame(pos=i, **frame) for i, frame in enumerate(crash['stack'])]
-    fn_max_length = Frame._meta.get_field('fn').max_length
-    for frame in stack:
-        if frame.fn:
-            frame.fn = frame.fn[:fn_max_length]
-    description = '\n'.join([f.function for f in stack])
-    stack_hash = Issue.generate_hash(stack)
-    try:
-        issue = p.issue_set.get(hash=stack_hash)
-        issue.modified = timezone.now()
-    except:
-        issue = Issue.objects.create(hash=stack_hash, project=p, modified=timezone.now(), created=timezone.now(),
-                                     description=description)
-        try:
-            issue.title = '#%d %s in %s' % (issue.id, crash['kind'], stack[0].function)
-        except:
-            issue.title = 'Issue #%d' % issue.id
-        issue.title = issue.title[:Issue._meta.get_field('title').max_length]
-
-    cr_params = {'ip': request.META.get('REMOTE_ADDR')}
-    for param in ['kind', 'component', 'version', 'annotation']:
-        if param in crash:
-            cr_params[param] = crash[param]
-    cr = CrashReport.objects.create(
-        issue=issue,
-        datetime=timezone.now(),
-        **cr_params)
-    for frame in stack:
-        frame.crashreport_id = cr.id
-        frame.save()
-
-    issue.update_last_affected_version(cr.version)
-    issue.update_status()
-    issue.save()
-
-    return HttpResponse("issue id %s, fixed: %s" % (issue.id, issue.status))
-
-
 from django.template import RequestContext
 
 
@@ -295,11 +247,14 @@ def issue_details(request, issue_id):
         foreign_tracker.issue_status = foreign_issue.status
         foreign_tracker.issue_url = foreign_issue.url
 
-    crashes = get_paginator(issue.crashreport_set.order_by('-datetime'), 25, request.GET.get('page'))
+    accidents = get_paginator(issue.accident_set.order_by('-datetime'), 25, request.GET.get('page'))
     return render_to_response('ceburasko/issue_details.html',
-                              {'issue': issue, 'foreign_trackers': foreign_trackers.values(), 'crashes': crashes, },
+                              {'issue': issue, 'foreign_trackers': foreign_trackers.values(), 'accidents': accidents, },
                               context_instance=RequestContext(request))
 
+
+def accident_details(request, accident_id):
+    accident = get_object_or_404(Accident, pk=accident_id)
 
 def crash_details(request, crash_id):
     crashreport = get_object_or_404(CrashReport, pk=crash_id)
