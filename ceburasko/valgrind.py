@@ -110,8 +110,6 @@ def crash(accident):
     res = {'binary_id': accident['binary_id']}
     if 'kind' in accident:
         res['kind'] = accident['kind']
-    if 'what' in accident:
-        res['kind'] = accident['what']
     if 'what_stack' in accident:
         res['stack'] = []
         for frame in accident['what_stack']:
@@ -121,8 +119,11 @@ def crash(accident):
                 'line': frame.line
             })
     annotation = []
+    if 'what' in accident:
+        annotation.append(accident['what'])
+        annotation.append('')
     if 'auxwhat' in accident:
-        annotation = [accident['auxwhat']]
+        annotation.append(accident['auxwhat'])
     if 'auxwhat_stack' in accident:
         for frame in accident['auxwhat_stack']:
             annotation.append('  %s' % frame)
