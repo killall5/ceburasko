@@ -20,6 +20,12 @@ class KindPriority(Model):
     priority = IntegerField(default=0)
 
 
+class UnknownKind(Model):
+    project = ForeignKey(Project)
+    kind = CharField(max_length=150)
+    accidents_count = IntegerField(default=0)
+
+
 class Issue(Model):
     project = ForeignKey(Project)
     title = CharField(max_length=200)
@@ -71,6 +77,7 @@ class Accident(Model):
 
     def __unicode__(self):
         return "Accident #%d" % (self.id, )
+
 
 class Frame(Model):
     accident = ForeignKey(Accident, related_name='stack')

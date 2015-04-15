@@ -13,25 +13,6 @@
 {% block body %}
 <h1>{{ project }}</h1>
 
-<h2>Opened issues {% if opened_issues %}<small>{{opened_issues_count}} total</small>{%endif%}</h2>
-{% if opened_issues %}
-{% include "ceburasko/opened_issues_snippet.html" with issues=opened_issues %}
-
-<p><a href="{% url 'ceburasko:issues' project.id %}">View all opened issues</a></p>
-{% else %}
-<p>No opened issues. Great!</p>
-{% endif %}
-
-
-<h2>Fixed issues {% if fixed_issues %}<small>{{fixed_issues_count}} total</small>{%endif%}</h2>
-{% if fixed_issues %}
-{% include "ceburasko/fixed_issues_snippet.html" with issues=fixed_issues %}
-
-<p><a href="{% url 'ceburasko:fixed-issues' project.id %}">View all fixed issues</a></p>
-
-{% else %}
-<p>No issues.</p>
-{% endif %}
-
+{% include "ceburasko/quick_links_snippet.html" %}
 
 {% endblock %}

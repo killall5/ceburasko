@@ -1,6 +1,4 @@
-# Create your views here.
-
-from django.shortcuts import get_object_or_404, render_to_response
+from django.shortcuts import get_object_or_404, get_list_or_404, render_to_response
 from ceburasko.models import *
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseRedirect
@@ -10,6 +8,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from django.db.models import Count
+from context_processors import set_default_order, to_order_by
 import hashlib
 
 """
@@ -54,11 +53,14 @@ def project_list(request):
 
 
 def project_details(request, project_id):
+    set_default_order('-priority')
     p = get_object_or_404(Project, pk=project_id)
-    opened_issues = p.issue_set.filter(is_fixed=False).annotate(accidents=Count('accident'))
+    context = RequestContext(request)
+    order_by = to_order_by(context['order'])
+    opened_issues = p.issue_set.filter(is_fixed=False).annotate(accidents_count=Count('accident')).order_by(order_by)
     opened_issues_count = len(opened_issues)
     opened_issues = opened_issues[:5]
-    fixed_issues = p.issue_set.filter(is_fixed=True).annotate(accidents=Count('accident'))
+    fixed_issues = p.issue_set.filter(is_fixed=True).annotate(accidents_count=Count('accident')).order_by(order_by)
     fixed_issues_count = len(fixed_issues)
     fixed_issues = fixed_issues[:5]
     builds = p.build_set.all()[:5]
@@ -73,7 +75,7 @@ def project_details(request, project_id):
             'fixed_issues_count': fixed_issues_count,
             'builds': builds,
         },
-        context_instance=RequestContext(request)
+        context_instance=context,
     )
 
 
@@ -83,18 +85,21 @@ def project_details(request, project_id):
 
 
 def issue_list(request, project_id, is_fixed=False):
+    set_default_order('-priority')
     p = get_object_or_404(Project, pk=project_id)
-    issues = p.issue_set.filter(is_fixed=is_fixed).annotate(accidents=Count('accident'))
-    issues_paged = get_paginator(issues, 1, request.GET.get('page'))
+    context = RequestContext(request)
+    order_by = to_order_by(context['order'])
+    issues = p.issue_set.filter(is_fixed=is_fixed).annotate(accidents_count=Count('accident')).order_by(order_by)
+    issues_paged = get_paginator(issues, 50, request.GET.get('page'))
 
     return render_to_response(
         'ceburasko/issue_list.html',
-         {
-             'is_fixed': is_fixed,
-             'project': p,
-             'issues': issues_paged,
-         },
-         context_instance=RequestContext(request)
+        {
+            'is_fixed': is_fixed,
+            'project': p,
+            'issues': issues_paged,
+        },
+        context_instance=context
     )
 
 """
@@ -177,6 +182,7 @@ def upload_accidents(request):
         payload = [payload]
     modified_issues = []
     responses = []
+    unknown_kinds = {}
     for case in payload:
         response = {}
         try:
@@ -210,6 +216,10 @@ def upload_accidents(request):
                 # Ignore accident kinds without priority
                 response['action'] = 'ignored'
                 response['reason'] = 'unknown kind'
+                try:
+                    unknown_kinds[reported_accident['kind']] += 1
+                except KeyError as e:
+                    unknown_kinds[reported_accident['kind']] = 1
                 responses.append(response)
                 continue
             significant_frame = None
@@ -260,6 +270,14 @@ def upload_accidents(request):
             for i, frame in enumerate(reported_accident['stack']):
                 Frame.objects.create(accident=accident, pos=i, **frame)
 
+    for kind, count in unknown_kinds.items():
+        try:
+            unknown_kind = project.unknownkind_set.get(kind=kind)
+            unknown_kind.accidents_count += count
+            unknown_kind.save()
+        except ObjectDoesNotExist as e:
+            project.unknownkind_set.create(kind=kind, accidents_count=count)
+
     # update all modified issues
     modified_time = timezone.now()
     for issue in modified_issues:
@@ -273,7 +291,10 @@ def upload_accidents(request):
 
 
 def issue_details(request, issue_id):
+    set_default_order('-datetime')
     issue = get_object_or_404(Issue, pk=issue_id)
+    context = RequestContext(request)
+    order_by = to_order_by(context['order'])
     # FIXME: needs left join
     foreign_trackers = {}
     for tracker in ForeignTracker.objects.all():
@@ -284,11 +305,11 @@ def issue_details(request, issue_id):
         foreign_tracker.issue_status = foreign_issue.status
         foreign_tracker.issue_url = foreign_issue.url
 
-    accidents = get_paginator(issue.accident_set.order_by('-datetime'), 25, request.GET.get('page'))
+    accidents = get_paginator(issue.accident_set.order_by(order_by), 25, request.GET.get('page'))
     return render_to_response(
         'ceburasko/issue_details.html',
         {'issue': issue, 'foreign_trackers': foreign_trackers.values(), 'accidents': accidents, },
-        context_instance=RequestContext(request)
+        context_instance=context,
     )
 
 
@@ -341,3 +362,30 @@ def issue_delete(request, issue_id):
     issue.delete()
     return HttpResponseRedirect(reverse('ceburasko:project_details', args=(project_id, )))
 
+
+def source_list(request, project_id):
+    p = get_object_or_404(Project, pk=project_id)
+    return render_to_response(
+        'ceburasko/source_list.html',
+        {'project': p},
+    )
+
+
+def source_add(request, project_id):
+    p = get_object_or_404(Project, pk=project_id)
+    p.sourcepath_set.create(path_substring=request.POST['path'])
+    return HttpResponseRedirect(reverse('ceburasko:sources', args=(p.id, )))
+
+
+def source_delete(request, project_id, source_id):
+    p = get_object_or_404(Project, pk=project_id)
+    p.sourcepath_set.get(pk=source_id).delete()
+    return HttpResponseRedirect(reverse('ceburasko:sources', args=(p.id, )))
+
+
+def kind_list(request, project_id):
+    p = get_object_or_404(Project, pk=project_id)
+    return render_to_response(
+        'ceburasko/kind_list.html',
+        {'project': p},
+    )

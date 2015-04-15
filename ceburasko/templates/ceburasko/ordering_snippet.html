@@ -1,6 +1,11 @@
 {% load add_get_parameter %}
-{%if request.GET.order == key and request.GET.dir != 'desc' %}
-<a href="{%add_get order=key dir='desc'%}">{{title}}</a>
+{% if key in order %}
+    {% for k, v in order.items %}
+        {% if k == key %}
+            <span class="glyphicon glyphicon-sort-by-attributes{%if v.dir == 'desc'%}-alt{%endif%}"></span>
+            <a href="{%add_get order=v.rev%}">{{title}}</a>
+        {% endif %}
+    {% endfor %}
 {% else %}
-<a href="{%add_get order=key dir='asc'%}">{{title}}</a>
+    <a href="{%add_get order=key %}">{{title}}</a>
 {% endif %}

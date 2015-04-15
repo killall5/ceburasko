@@ -26,6 +26,12 @@
         </div>
     </div>
     <div class="form-group">
+        <label class="col-md-3 col-xs-3 control-label">Kind</label>
+        <div class="col-md-3 col-xs-5">
+            <p class="form-control-static">{{ issue.kind }}</p>
+        </div>
+    </div>
+    <div class="form-group">
         <label class="col-md-3 col-xs-3 control-label">Accidents</label>
         <div class="col-md-3 col-xs-5">
             <p class="form-control-static">{{ issue.accident_set.count }}</p>
@@ -87,9 +93,9 @@
 <table class="table table-striped">
     <tr>
         <th>#</th>
-        <th>Date</th>
+        <th>{%include "ceburasko/ordering_snippet.html" with title="Date" key="datetime"%}</th>
         <th>IP address</th>
-        <th>Build</th>
+        <th>{%include "ceburasko/ordering_snippet.html" with title="Build" key="build"%}</th>
         <th>Binary</th>
     </tr>
 {% for accident in accidents %}

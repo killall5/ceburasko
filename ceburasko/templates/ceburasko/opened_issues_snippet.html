@@ -3,17 +3,17 @@
         <th>{%include "ceburasko/ordering_snippet.html" with title="Priority" key="priority"%}</th>
         <th>Summary</th>
         <th>Foreign</th>
-        <th>Accidents</th>
-        <th>Updated</th>
-        <th>First version</th>
-        <th>Last version</th>
+        <th>{%include "ceburasko/ordering_snippet.html" with title="Accidents" key="accidents_count"%}</th>
+        <th>{%include "ceburasko/ordering_snippet.html" with title="Modified" key="modified_time"%}</th>
+        <th>{%include "ceburasko/ordering_snippet.html" with title="First version" key="first_affected_version"%}</th>
+        <th>{%include "ceburasko/ordering_snippet.html" with title="Last version" key="last_affected_version"%}</th>
     </tr>
     {% for issue in issues %}
     <tr>
         <td>{{ issue.priority }}</td>
         <td><a href="{% url 'ceburasko:issue_details' issue.id %}">{{ issue }}</a></td>
         <td>{% for fi in issue.foreignissue_set.all %}<a href="{{fi.url}}">{{fi.key}}</a> {%endfor%}</td>
-        <td>{{ issue.accidents }}</td>
+        <td>{{ issue.accidents_count }}</td>
         <td>{{ issue.modified_time|date:'Y-m-d H:i:s' }}</td>
         <td>{{ issue.first_affected_version }}</td>
         <td>{{ issue.last_affected_version }}</td>

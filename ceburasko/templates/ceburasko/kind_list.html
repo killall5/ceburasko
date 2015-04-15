@@ -1,0 +1,47 @@
+{% extends 'ceburasko/base.html' %}
+{% load url from future %}
+
+{% block title %} Sources &mdash; {{ project }} &mdash; Ceburasko {% endblock %}
+
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'ceburasko:projects' %}">Projects</a></li>
+        <li><a href="{% url 'ceburasko:project_details' project.id %}">{{ project }}</a></li>
+        <li class="active">Issue kinds</li>
+    </ol>
+{% endblock %}
+
+{% block body %}
+<h1>{{ project.name }} issue kinds</h1>
+
+<h2>Known kinds</h2>
+
+<table class="table table-striped">
+    <tr>
+        <th>Kind</th>
+        <th>Priority</th>
+    </tr>
+{% for kind in project.kindpriority_set.all %}
+    <tr>
+        <td>{{kind.kind}}</td>
+        <td>{{kind.priority}}</td>
+    </tr>
+{% endfor %}
+</table>
+
+<h2>Unknown kinds</h2>
+
+<table class="table table-striped">
+    <tr>
+        <th>Kind</th>
+        <th>Accidents count</th>
+    </tr>
+{% for kind in project.unknownkind_set.all %}
+    <tr>
+        <td>{{kind.kind}}</td>
+        <td>{{kind.accidents_count}}</td>
+    </tr>
+{% endfor %}
+</table>
+
+{% endblock %}

@@ -162,6 +162,8 @@ class UploadAccidentTest(TestCase):
         response = yaml.load(response.content)[0]
         self.assertEqual(response['action'], 'ignored')
         self.assertEqual(response['reason'], 'unknown kind')
+        unknown_kind = UnknownKind.objects.get(kind='stopped')
+        self.assertEqual(unknown_kind.accidents_count, 1)
 
     def test_unknown_source(self):
         accidents = [

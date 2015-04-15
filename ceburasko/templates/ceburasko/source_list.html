@@ -1,0 +1,46 @@
+{% extends 'ceburasko/base.html' %}
+{% load url from future %}
+
+{% block title %} Sources &mdash; {{ project }} &mdash; Ceburasko {% endblock %}
+
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'ceburasko:projects' %}">Projects</a></li>
+        <li><a href="{% url 'ceburasko:project_details' project.id %}">{{ project }}</a></li>
+        <li class="active">Sources</li>
+    </ol>
+{% endblock %}
+
+{% block body %}
+<h1>{{ project.name }} sources</h1>
+
+<table class="table table-stripped">
+    <tr>
+        <th>Source path fragment</th>
+        <th>Actions</th>
+    </tr>
+    {% for source in project.sourcepath_set.all %}
+    <tr>
+        <td>{{source.path_substring}}</td>
+        <td>
+            <a href="{%url 'ceburasko:source_delete' project.id source.id%}">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2>Add source path fragment</h2>
+<form class="form-horizontal" role="form" action="{% url 'ceburasko:source_add' project.id %}" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="path" class="col-md-2 col-xs-2">Path fragment:</label>
+        <div class="col-md-7 col-xs-7">
+            <input type="input" id="path" name="path" class="form-control input" value="" placeholder="src/path/fragment">
+        </div>
+        <div class="col-md-3 col-xs-3">
+            <button type="submit" class="btn btn-default">Add</button>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
