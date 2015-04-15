@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 from argparse import ArgumentParser
-from ceburasko.api import upload_errors
-from ceburasko.log_parsers import errors_from_gdb_log
+from ceburasko.api import upload_accidents
+from ceburasko.log_parsers import accidents_from_gdb_log
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -12,5 +12,5 @@ if __name__ == "__main__":
         help = 'Ceburasko project URL for upload crash stack')
     args = parser.parse_args()
 
-    errors = errors_from_gdb_log(args.gdblog)
-    upload_errors(errors, args.project_url)
+    accidents = accidents_from_gdb_log(args.gdblog)
+    upload_accidents(accidents, args.project_url)

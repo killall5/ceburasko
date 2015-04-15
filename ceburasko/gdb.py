@@ -64,7 +64,7 @@ def parse_gdb(input_stream):
         yield crash
 
 
-def errors_from_gdb_log(filename):
+def accidents_from_gdb_log(filename):
     with open(filename) as f:
         log = f.read().split('\n')
 
@@ -82,7 +82,7 @@ def errors_from_gdb_log(filename):
         return
 
     annotation = '\n'.join(log)
-    for error in parse_gdb(log):
-        error['annotation'] = annotation
-        error['binary_id'] = binary_id
-        yield error
+    for accident in parse_gdb(log):
+        accident['annotation'] = annotation
+        accident['binary_id'] = binary_id
+        yield accident
