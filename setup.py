@@ -13,7 +13,7 @@ def files(basedir, dirs):
 
 setup(
     name = 'ceburasko',
-    version = '3.0',
+    version = '3.0.1',
     description = 'Ceburasko Django app',
     long_description = 'Django application for store crashes',
     author = 'Alexey Tamarevskiy',
