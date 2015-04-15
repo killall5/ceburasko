@@ -368,6 +368,7 @@ def source_list(request, project_id):
     return render_to_response(
         'ceburasko/source_list.html',
         {'project': p},
+        context_instance=RequestContext(request),
     )
 
 
