@@ -13,13 +13,13 @@ def files(basedir, dirs):
 
 setup(
     name = 'ceburasko',
-    version = '3.0.1',
+    version = '3.0.2',
     description = 'Ceburasko Django app',
     long_description = 'Django application for store crashes',
     author = 'Alexey Tamarevskiy',
     author_email = 'mirror@inetra.ru',
-    packages = [ 'ceburasko' ],
-    package_data = { 'ceburasko': list(files('ceburasko', ('static', 'templates'))) },
+    packages = [ 'ceburasko', 'ceburasko.context_processors', 'ceburasko.migrations', 'ceburasko.templatetags', ],
+    package_data = { 'ceburasko': list(files('ceburasko', ('static', 'templates', 'data', ))) },
     scripts = [
         'ceburasko-binary-id',
         'ceburasko-upload-binaries',
