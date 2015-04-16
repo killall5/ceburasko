@@ -83,11 +83,12 @@ class GdbParseTest(TestCase):
 
 class UploadAccidentTest(TestCase):
     def setUp(self):
-        project = Project.objects.create(name='FooBar')
-        SourcePath.objects.create(project=project, path_substring='/foobar/')
-        KindPriority.objects.create(project=project, kind='killed', priority=100)
-        build = Build.objects.create(project=project, version=Version('1.0.0.0'))
-        Binary.objects.create(build=build, hash='fake:asdf', filename='bin/true')
+        self.basedir = os.path.join(os.path.dirname(gdb.__file__), '')
+        self.project = Project.objects.create(name='FooBar')
+        SourcePath.objects.create(project=self.project, path_substring='/foobar/')
+        KindPriority.objects.create(project=self.project, kind='killed', priority=100)
+        self.build = Build.objects.create(project=self.project, version=Version('1.0.0.0'))
+        Binary.objects.create(build=self.build, hash='fake:asdf', filename='bin/true')
         self.client = Client()
 
     def test_correct_accident(self):
@@ -254,3 +255,23 @@ class UploadAccidentTest(TestCase):
         self.assertEqual(responses[0]['action'], 'accepted')
         self.assertEqual(responses[0]['project'], responses[1]['project'])
         self.assertNotEqual(responses[0]['issue'], responses[1]['issue'])
+
+    def test_speed_test(self):
+        with open(self.basedir + 'data/upload-accidents.yaml') as f:
+            payload = f.read()
+
+        Binary.objects.create(build=self.build, hash='build-id:6fe4f1971b42bf59a4c2c0151814d2ef40883fa8', filename='bin/bash', )
+        KindPriority.objects.create(project=self.project, kind='InvalidRead', priority=10)
+        KindPriority.objects.create(project=self.project, kind='InvalidWrite', priority=10)
+        SourcePath.objects.create(project=self.project, path_substring="parts/libp2ptv")
+
+        response = self.client.post('/crashes/upload-accidents/', payload, content_type='application/yaml')
+        self.assertEqual(response.status_code, 200)
+        response = yaml.load(response.content)
+        for r in response:
+            self.assertEqual(r['action'], 'accepted')
+        self.assertNotEqual(response[0]['issue'], response[1]['issue'])
+        self.assertNotEqual(response[2]['issue'], response[1]['issue'])
+        self.assertNotEqual(response[0]['issue'], response[2]['issue'])
+        for r in response[3:]:
+            self.assertEqual(response[0]['issue'], r['issue'])

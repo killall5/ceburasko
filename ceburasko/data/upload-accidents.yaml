@@ -1,0 +1,470 @@
+- accidents:
+  - annotation: "Invalid read of size 8\n\nAddress 0x6457f50 is 48 bytes inside a\
+      \ block of size 56 free'd\n  operator delete(void*)\n  __gnu_cxx::new_allocator<std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> > >::deallocate(std::_Rb_tree_node<std::pair<hls::StreamId const,\
+      \ void*> >*, unsigned long) at new_allocator.h:100\n  std::_Rb_tree<hls::StreamId,\
+      \ std::pair<hls::StreamId const, void*>, std::_Select1st<std::pair<hls::StreamId\
+      \ const, void*> >, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >::_M_put_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:373\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_destroy_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:395\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_erase_aux(std::_Rb_tree_const_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:1498\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:783\n  std::map<hls::StreamId, void*, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_map.h:638\n  boost::ptr_container_detail::associative_ptr_container<boost::ptr_container_detail::map_config<coordinator::common::TreeInfo,\
+      \ std::map<hls::StreamId, void*, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >, true>, boost::heap_clone_allocator>::erase(boost::ptr_map_iterator<std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >, hls::StreamId, coordinator::common::TreeInfo* const>) at\
+      \ associative_ptr_container.hpp:152\n  coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_TreeManagerImpl.cpp:266\n  coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_ServerEventProcessor.cpp:433\n  coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)\
+      \ at coordinator_DistributionTreeImpl.cpp:369\n  coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,\
+      \ unsigned long) at coordinator_TreeProcessingAlgorithmImpl.cpp:137"
+    kind: InvalidRead
+    stack:
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/target/third-party/boost_1_55_0/boost/ptr_container/detail/map_iterator.hpp,
+      fn: 'boost::ptr_container_detail::ref_pair<hls::StreamId, coordinator::common::TreeInfo*
+        const>::ref_pair<hls::StreamId const, void*>(std::pair<hls::StreamId const,
+        void*> const&)', line: '44'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/target/third-party/boost_1_55_0/boost/iterator/iterator_adaptor.hpp,
+      fn: 'boost::iterator_adaptor<boost::ptr_map_iterator<std::_Rb_tree_iterator<std::pair<hls::StreamId
+        const, void*> >, hls::StreamId, coordinator::common::TreeInfo* const>, std::_Rb_tree_iterator<std::pair<hls::StreamId
+        const, void*> >, boost::ptr_container_detail::ref_pair<hls::StreamId, coordinator::common::TreeInfo*
+        const>, boost::use_default, boost::ptr_container_detail::ref_pair<hls::StreamId,
+        coordinator::common::TreeInfo* const>, boost::use_default>::dereference()
+        const', line: '306'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/target/third-party/boost_1_55_0/boost/iterator/iterator_facade.hpp,
+      fn: 'boost::ptr_map_iterator<std::_Rb_tree_iterator<std::pair<hls::StreamId
+        const, void*> >, hls::StreamId, coordinator::common::TreeInfo* const>::reference
+        boost::iterator_core_access::dereference<boost::ptr_map_iterator<std::_Rb_tree_iterator<std::pair<hls::StreamId
+        const, void*> >, hls::StreamId, coordinator::common::TreeInfo* const> >(boost::ptr_map_iterator<std::_Rb_tree_iterator<std::pair<hls::StreamId
+        const, void*> >, hls::StreamId, coordinator::common::TreeInfo* const> const&)',
+      line: '514'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/target/third-party/boost_1_55_0/boost/iterator/iterator_facade.hpp,
+      fn: 'boost::iterator_facade<boost::ptr_map_iterator<std::_Rb_tree_iterator<std::pair<hls::StreamId
+        const, void*> >, hls::StreamId, coordinator::common::TreeInfo* const>, boost::ptr_container_detail::ref_pair<hls::StreamId,
+        coordinator::common::TreeInfo* const>, boost::bidirectional_traversal_tag,
+        boost::ptr_container_detail::ref_pair<hls::StreamId, coordinator::common::TreeInfo*
+        const>, long>::operator*() const', line: '639'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/target/third-party/boost_1_55_0/boost/iterator/iterator_facade.hpp,
+      fn: 'boost::iterator_facade<boost::ptr_map_iterator<std::_Rb_tree_iterator<std::pair<hls::StreamId
+        const, void*> >, hls::StreamId, coordinator::common::TreeInfo* const>, boost::ptr_container_detail::ref_pair<hls::StreamId,
+        coordinator::common::TreeInfo* const>, boost::bidirectional_traversal_tag,
+        boost::ptr_container_detail::ref_pair<hls::StreamId, coordinator::common::TreeInfo*
+        const>, long>::operator->() const', line: '644'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)',
+      line: '267'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/networking/coordinator_ServerEventProcessor.cpp,
+      fn: 'coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)',
+      line: '433'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_DistributionTreeImpl.cpp,
+      fn: 'coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)',
+      line: '369'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeProcessingAlgorithmImpl.cpp,
+      fn: 'coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,
+        unsigned long)', line: '137'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeProcessingAlgorithmImpl.cpp,
+      fn: 'coordinator::distribution::TreeProcessingAlgorithmImpl::WashDistributionTree(coordinator::distribution::DistributionTree*,
+        unsigned long, unsigned long)', line: '251'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::CleanTrees()', line: '55'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/target/third-party/boost_1_55_0/boost/bind/mem_fn_template.hpp,
+      fn: 'boost::_mfi::mf0<void, coordinator::distribution::DistributionManagerImpl>::operator()(coordinator::distribution::DistributionManagerImpl*)
+        const', line: '49'}
+  - annotation: "Invalid read of size 8\n\nAddress 0x6457f40 is 32 bytes inside a\
+      \ block of size 56 free'd\n  operator delete(void*)\n  __gnu_cxx::new_allocator<std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> > >::deallocate(std::_Rb_tree_node<std::pair<hls::StreamId const,\
+      \ void*> >*, unsigned long) at new_allocator.h:100\n  std::_Rb_tree<hls::StreamId,\
+      \ std::pair<hls::StreamId const, void*>, std::_Select1st<std::pair<hls::StreamId\
+      \ const, void*> >, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >::_M_put_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:373\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_destroy_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:395\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_erase_aux(std::_Rb_tree_const_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:1498\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:783\n  std::map<hls::StreamId, void*, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_map.h:638\n  boost::ptr_container_detail::associative_ptr_container<boost::ptr_container_detail::map_config<coordinator::common::TreeInfo,\
+      \ std::map<hls::StreamId, void*, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >, true>, boost::heap_clone_allocator>::erase(boost::ptr_map_iterator<std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >, hls::StreamId, coordinator::common::TreeInfo* const>) at\
+      \ associative_ptr_container.hpp:152\n  coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_TreeManagerImpl.cpp:266\n  coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_ServerEventProcessor.cpp:433\n  coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)\
+      \ at coordinator_DistributionTreeImpl.cpp:369\n  coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,\
+      \ unsigned long) at coordinator_TreeProcessingAlgorithmImpl.cpp:137"
+    kind: InvalidRead
+    stack:
+    - {file: null, fn: 'std::string::compare(std::string const&) const', line: null}
+    - {file: /usr/include/c++/4.7/bits/basic_string.h, fn: 'bool std::operator< <char,
+        std::char_traits<char>, std::allocator<char> >(std::basic_string<char, std::char_traits<char>,
+        std::allocator<char> > const&, std::basic_string<char, std::char_traits<char>,
+        std::allocator<char> > const&)', line: '2568'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/hls/hls_PresentationId.cpp,
+      fn: 'hls::PresentationId::operator<(hls::PresentationId const&) const', line: '32'}
+    - {file: /usr/include/c++/4.7/bits/stl_function.h, fn: 'std::less<hls::PresentationId>::operator()(hls::PresentationId
+        const&, hls::PresentationId const&) const', line: '237'}
+    - {file: /usr/include/c++/4.7/bits/stl_tree.h, fn: 'std::_Rb_tree<hls::PresentationId,
+        std::pair<hls::PresentationId const, std::set<hls::Stream, hls::Stream::BandwidthComparator,
+        std::allocator<hls::Stream> > >, std::_Select1st<std::pair<hls::PresentationId
+        const, std::set<hls::Stream, hls::Stream::BandwidthComparator, std::allocator<hls::Stream>
+        > > >, std::less<hls::PresentationId>, std::allocator<std::pair<hls::PresentationId
+        const, std::set<hls::Stream, hls::Stream::BandwidthComparator, std::allocator<hls::Stream>
+        > > > >::_M_lower_bound(std::_Rb_tree_node<std::pair<hls::PresentationId const,
+        std::set<hls::Stream, hls::Stream::BandwidthComparator, std::allocator<hls::Stream>
+        > > >*, std::_Rb_tree_node<std::pair<hls::PresentationId const, std::set<hls::Stream,
+        hls::Stream::BandwidthComparator, std::allocator<hls::Stream> > > >*, hls::PresentationId
+        const&)', line: '1098'}
+    - {file: /usr/include/c++/4.7/bits/stl_tree.h, fn: 'std::_Rb_tree<hls::PresentationId,
+        std::pair<hls::PresentationId const, std::set<hls::Stream, hls::Stream::BandwidthComparator,
+        std::allocator<hls::Stream> > >, std::_Select1st<std::pair<hls::PresentationId
+        const, std::set<hls::Stream, hls::Stream::BandwidthComparator, std::allocator<hls::Stream>
+        > > >, std::less<hls::PresentationId>, std::allocator<std::pair<hls::PresentationId
+        const, std::set<hls::Stream, hls::Stream::BandwidthComparator, std::allocator<hls::Stream>
+        > > > >::find(hls::PresentationId const&)', line: '1544'}
+    - {file: /usr/include/c++/4.7/bits/stl_map.h, fn: 'std::map<hls::PresentationId,
+        std::set<hls::Stream, hls::Stream::BandwidthComparator, std::allocator<hls::Stream>
+        >, std::less<hls::PresentationId>, std::allocator<std::pair<hls::PresentationId
+        const, std::set<hls::Stream, hls::Stream::BandwidthComparator, std::allocator<hls::Stream>
+        > > > >::find(hls::PresentationId const&)', line: '749'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::RemoveStreamFromPresentations(hls::StreamId
+        const&)', line: '280'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)',
+      line: '267'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/networking/coordinator_ServerEventProcessor.cpp,
+      fn: 'coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)',
+      line: '433'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_DistributionTreeImpl.cpp,
+      fn: 'coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)',
+      line: '369'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeProcessingAlgorithmImpl.cpp,
+      fn: 'coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,
+        unsigned long)', line: '137'}
+  - annotation: "Invalid read of size 8\n\nAddress 0x6457f40 is 32 bytes inside a\
+      \ block of size 56 free'd\n  operator delete(void*)\n  __gnu_cxx::new_allocator<std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> > >::deallocate(std::_Rb_tree_node<std::pair<hls::StreamId const,\
+      \ void*> >*, unsigned long) at new_allocator.h:100\n  std::_Rb_tree<hls::StreamId,\
+      \ std::pair<hls::StreamId const, void*>, std::_Select1st<std::pair<hls::StreamId\
+      \ const, void*> >, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >::_M_put_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:373\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_destroy_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:395\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_erase_aux(std::_Rb_tree_const_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:1498\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:783\n  std::map<hls::StreamId, void*, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_map.h:638\n  boost::ptr_container_detail::associative_ptr_container<boost::ptr_container_detail::map_config<coordinator::common::TreeInfo,\
+      \ std::map<hls::StreamId, void*, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >, true>, boost::heap_clone_allocator>::erase(boost::ptr_map_iterator<std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >, hls::StreamId, coordinator::common::TreeInfo* const>) at\
+      \ associative_ptr_container.hpp:152\n  coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_TreeManagerImpl.cpp:266\n  coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_ServerEventProcessor.cpp:433\n  coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)\
+      \ at coordinator_DistributionTreeImpl.cpp:369\n  coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,\
+      \ unsigned long) at coordinator_TreeProcessingAlgorithmImpl.cpp:137"
+    kind: InvalidRead
+    stack:
+    - {file: null, fn: 'std::string::compare(std::string const&) const', line: null}
+    - {file: /usr/include/c++/4.7/bits/basic_string.h, fn: 'bool std::operator< <char,
+        std::char_traits<char>, std::allocator<char> >(std::basic_string<char, std::char_traits<char>,
+        std::allocator<char> > const&, std::basic_string<char, std::char_traits<char>,
+        std::allocator<char> > const&)', line: '2568'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/hls/hls_PresentationId.cpp,
+      fn: 'hls::PresentationId::operator<(hls::PresentationId const&) const', line: '32'}
+    - {file: /usr/include/c++/4.7/bits/stl_function.h, fn: 'std::less<hls::PresentationId>::operator()(hls::PresentationId
+        const&, hls::PresentationId const&) const', line: '237'}
+    - {file: /usr/include/c++/4.7/bits/stl_tree.h, fn: 'std::_Rb_tree<hls::PresentationId,
+        std::pair<hls::PresentationId const, std::set<hls::Stream, hls::Stream::BandwidthComparator,
+        std::allocator<hls::Stream> > >, std::_Select1st<std::pair<hls::PresentationId
+        const, std::set<hls::Stream, hls::Stream::BandwidthComparator, std::allocator<hls::Stream>
+        > > >, std::less<hls::PresentationId>, std::allocator<std::pair<hls::PresentationId
+        const, std::set<hls::Stream, hls::Stream::BandwidthComparator, std::allocator<hls::Stream>
+        > > > >::find(hls::PresentationId const&)', line: '1547'}
+    - {file: /usr/include/c++/4.7/bits/stl_map.h, fn: 'std::map<hls::PresentationId,
+        std::set<hls::Stream, hls::Stream::BandwidthComparator, std::allocator<hls::Stream>
+        >, std::less<hls::PresentationId>, std::allocator<std::pair<hls::PresentationId
+        const, std::set<hls::Stream, hls::Stream::BandwidthComparator, std::allocator<hls::Stream>
+        > > > >::find(hls::PresentationId const&)', line: '749'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::RemoveStreamFromPresentations(hls::StreamId
+        const&)', line: '280'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)',
+      line: '267'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/networking/coordinator_ServerEventProcessor.cpp,
+      fn: 'coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)',
+      line: '433'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_DistributionTreeImpl.cpp,
+      fn: 'coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)',
+      line: '369'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeProcessingAlgorithmImpl.cpp,
+      fn: 'coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,
+        unsigned long)', line: '137'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeProcessingAlgorithmImpl.cpp,
+      fn: 'coordinator::distribution::TreeProcessingAlgorithmImpl::WashDistributionTree(coordinator::distribution::DistributionTree*,
+        unsigned long, unsigned long)', line: '251'}
+  - annotation: "Invalid read of size 8\n\nAddress 0x6457f40 is 32 bytes inside a\
+      \ block of size 56 free'd\n  operator delete(void*)\n  __gnu_cxx::new_allocator<std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> > >::deallocate(std::_Rb_tree_node<std::pair<hls::StreamId const,\
+      \ void*> >*, unsigned long) at new_allocator.h:100\n  std::_Rb_tree<hls::StreamId,\
+      \ std::pair<hls::StreamId const, void*>, std::_Select1st<std::pair<hls::StreamId\
+      \ const, void*> >, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >::_M_put_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:373\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_destroy_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:395\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_erase_aux(std::_Rb_tree_const_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:1498\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:783\n  std::map<hls::StreamId, void*, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_map.h:638\n  boost::ptr_container_detail::associative_ptr_container<boost::ptr_container_detail::map_config<coordinator::common::TreeInfo,\
+      \ std::map<hls::StreamId, void*, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >, true>, boost::heap_clone_allocator>::erase(boost::ptr_map_iterator<std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >, hls::StreamId, coordinator::common::TreeInfo* const>) at\
+      \ associative_ptr_container.hpp:152\n  coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_TreeManagerImpl.cpp:266\n  coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_ServerEventProcessor.cpp:433\n  coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)\
+      \ at coordinator_DistributionTreeImpl.cpp:369\n  coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,\
+      \ unsigned long) at coordinator_TreeProcessingAlgorithmImpl.cpp:137"
+    kind: InvalidRead
+    stack:
+    - {file: null, fn: 'std::string::size() const', line: null}
+    - {file: null, fn: '__gnu_cxx::__enable_if<std::__is_char<char>::__value, bool>::__type
+        std::operator==<char>(std::basic_string<char, std::char_traits<char>, std::allocator<char>
+        > const&, std::basic_string<char, std::char_traits<char>, std::allocator<char>
+        > const&)', line: null}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/hls/hls_PresentationId.cpp,
+      fn: 'hls::PresentationId::operator==(hls::PresentationId const&) const', line: '42'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/hls/hls_StreamId.cpp,
+      fn: 'hls::StreamId::operator==(hls::StreamId const&) const', line: '51'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::RemoveStreamFromPresentations(hls::StreamId
+        const&)', line: '285'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)',
+      line: '267'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/networking/coordinator_ServerEventProcessor.cpp,
+      fn: 'coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)',
+      line: '433'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_DistributionTreeImpl.cpp,
+      fn: 'coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)',
+      line: '369'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeProcessingAlgorithmImpl.cpp,
+      fn: 'coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,
+        unsigned long)', line: '137'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeProcessingAlgorithmImpl.cpp,
+      fn: 'coordinator::distribution::TreeProcessingAlgorithmImpl::WashDistributionTree(coordinator::distribution::DistributionTree*,
+        unsigned long, unsigned long)', line: '251'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::CleanTrees()', line: '55'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/target/third-party/boost_1_55_0/boost/bind/mem_fn_template.hpp,
+      fn: 'boost::_mfi::mf0<void, coordinator::distribution::DistributionManagerImpl>::operator()(coordinator::distribution::DistributionManagerImpl*)
+        const', line: '49'}
+  - annotation: "Invalid read of size 8\n\nAddress 0x6457f40 is 32 bytes inside a\
+      \ block of size 56 free'd\n  operator delete(void*)\n  __gnu_cxx::new_allocator<std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> > >::deallocate(std::_Rb_tree_node<std::pair<hls::StreamId const,\
+      \ void*> >*, unsigned long) at new_allocator.h:100\n  std::_Rb_tree<hls::StreamId,\
+      \ std::pair<hls::StreamId const, void*>, std::_Select1st<std::pair<hls::StreamId\
+      \ const, void*> >, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >::_M_put_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:373\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_destroy_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:395\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_erase_aux(std::_Rb_tree_const_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:1498\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:783\n  std::map<hls::StreamId, void*, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_map.h:638\n  boost::ptr_container_detail::associative_ptr_container<boost::ptr_container_detail::map_config<coordinator::common::TreeInfo,\
+      \ std::map<hls::StreamId, void*, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >, true>, boost::heap_clone_allocator>::erase(boost::ptr_map_iterator<std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >, hls::StreamId, coordinator::common::TreeInfo* const>) at\
+      \ associative_ptr_container.hpp:152\n  coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_TreeManagerImpl.cpp:266\n  coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_ServerEventProcessor.cpp:433\n  coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)\
+      \ at coordinator_DistributionTreeImpl.cpp:369\n  coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,\
+      \ unsigned long) at coordinator_TreeProcessingAlgorithmImpl.cpp:137"
+    kind: InvalidRead
+    stack:
+    - {file: null, fn: 'std::string::data() const', line: null}
+    - {file: null, fn: '__gnu_cxx::__enable_if<std::__is_char<char>::__value, bool>::__type
+        std::operator==<char>(std::basic_string<char, std::char_traits<char>, std::allocator<char>
+        > const&, std::basic_string<char, std::char_traits<char>, std::allocator<char>
+        > const&)', line: null}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/hls/hls_PresentationId.cpp,
+      fn: 'hls::PresentationId::operator==(hls::PresentationId const&) const', line: '42'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/hls/hls_StreamId.cpp,
+      fn: 'hls::StreamId::operator==(hls::StreamId const&) const', line: '51'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::RemoveStreamFromPresentations(hls::StreamId
+        const&)', line: '285'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)',
+      line: '267'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/networking/coordinator_ServerEventProcessor.cpp,
+      fn: 'coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)',
+      line: '433'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_DistributionTreeImpl.cpp,
+      fn: 'coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)',
+      line: '369'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeProcessingAlgorithmImpl.cpp,
+      fn: 'coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,
+        unsigned long)', line: '137'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeProcessingAlgorithmImpl.cpp,
+      fn: 'coordinator::distribution::TreeProcessingAlgorithmImpl::WashDistributionTree(coordinator::distribution::DistributionTree*,
+        unsigned long, unsigned long)', line: '251'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::CleanTrees()', line: '55'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/target/third-party/boost_1_55_0/boost/bind/mem_fn_template.hpp,
+      fn: 'boost::_mfi::mf0<void, coordinator::distribution::DistributionManagerImpl>::operator()(coordinator::distribution::DistributionManagerImpl*)
+        const', line: '49'}
+  - annotation: "Invalid read of size 8\n\nAddress 0x6457f48 is 40 bytes inside a\
+      \ block of size 56 free'd\n  operator delete(void*)\n  __gnu_cxx::new_allocator<std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> > >::deallocate(std::_Rb_tree_node<std::pair<hls::StreamId const,\
+      \ void*> >*, unsigned long) at new_allocator.h:100\n  std::_Rb_tree<hls::StreamId,\
+      \ std::pair<hls::StreamId const, void*>, std::_Select1st<std::pair<hls::StreamId\
+      \ const, void*> >, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >::_M_put_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:373\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_destroy_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:395\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_erase_aux(std::_Rb_tree_const_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:1498\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:783\n  std::map<hls::StreamId, void*, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_map.h:638\n  boost::ptr_container_detail::associative_ptr_container<boost::ptr_container_detail::map_config<coordinator::common::TreeInfo,\
+      \ std::map<hls::StreamId, void*, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >, true>, boost::heap_clone_allocator>::erase(boost::ptr_map_iterator<std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >, hls::StreamId, coordinator::common::TreeInfo* const>) at\
+      \ associative_ptr_container.hpp:152\n  coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_TreeManagerImpl.cpp:266\n  coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_ServerEventProcessor.cpp:433\n  coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)\
+      \ at coordinator_DistributionTreeImpl.cpp:369\n  coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,\
+      \ unsigned long) at coordinator_TreeProcessingAlgorithmImpl.cpp:137"
+    kind: InvalidRead
+    stack:
+    - {file: null, fn: 'std::string::size() const', line: null}
+    - {file: null, fn: '__gnu_cxx::__enable_if<std::__is_char<char>::__value, bool>::__type
+        std::operator==<char>(std::basic_string<char, std::char_traits<char>, std::allocator<char>
+        > const&, std::basic_string<char, std::char_traits<char>, std::allocator<char>
+        > const&)', line: null}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/hls/hls_EncodingId.cpp,
+      fn: 'hls::EncodingId::operator==(hls::EncodingId const&) const', line: '42'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/hls/hls_StreamId.cpp,
+      fn: 'hls::StreamId::operator==(hls::StreamId const&) const', line: '51'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::RemoveStreamFromPresentations(hls::StreamId
+        const&)', line: '285'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)',
+      line: '267'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/networking/coordinator_ServerEventProcessor.cpp,
+      fn: 'coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)',
+      line: '433'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_DistributionTreeImpl.cpp,
+      fn: 'coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)',
+      line: '369'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeProcessingAlgorithmImpl.cpp,
+      fn: 'coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,
+        unsigned long)', line: '137'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeProcessingAlgorithmImpl.cpp,
+      fn: 'coordinator::distribution::TreeProcessingAlgorithmImpl::WashDistributionTree(coordinator::distribution::DistributionTree*,
+        unsigned long, unsigned long)', line: '251'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::CleanTrees()', line: '55'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/target/third-party/boost_1_55_0/boost/bind/mem_fn_template.hpp,
+      fn: 'boost::_mfi::mf0<void, coordinator::distribution::DistributionManagerImpl>::operator()(coordinator::distribution::DistributionManagerImpl*)
+        const', line: '49'}
+  - annotation: "Invalid read of size 8\n\nAddress 0x6457f48 is 40 bytes inside a\
+      \ block of size 56 free'd\n  operator delete(void*)\n  __gnu_cxx::new_allocator<std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> > >::deallocate(std::_Rb_tree_node<std::pair<hls::StreamId const,\
+      \ void*> >*, unsigned long) at new_allocator.h:100\n  std::_Rb_tree<hls::StreamId,\
+      \ std::pair<hls::StreamId const, void*>, std::_Select1st<std::pair<hls::StreamId\
+      \ const, void*> >, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >::_M_put_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:373\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_destroy_node(std::_Rb_tree_node<std::pair<hls::StreamId\
+      \ const, void*> >*) at stl_tree.h:395\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::_M_erase_aux(std::_Rb_tree_const_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:1498\n  std::_Rb_tree<hls::StreamId, std::pair<hls::StreamId\
+      \ const, void*>, std::_Select1st<std::pair<hls::StreamId const, void*> >, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_tree.h:783\n  std::map<hls::StreamId, void*, std::less<hls::StreamId>,\
+      \ std::allocator<std::pair<hls::StreamId const, void*> > >::erase(std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >) at stl_map.h:638\n  boost::ptr_container_detail::associative_ptr_container<boost::ptr_container_detail::map_config<coordinator::common::TreeInfo,\
+      \ std::map<hls::StreamId, void*, std::less<hls::StreamId>, std::allocator<std::pair<hls::StreamId\
+      \ const, void*> > >, true>, boost::heap_clone_allocator>::erase(boost::ptr_map_iterator<std::_Rb_tree_iterator<std::pair<hls::StreamId\
+      \ const, void*> >, hls::StreamId, coordinator::common::TreeInfo* const>) at\
+      \ associative_ptr_container.hpp:152\n  coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_TreeManagerImpl.cpp:266\n  coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)\
+      \ at coordinator_ServerEventProcessor.cpp:433\n  coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)\
+      \ at coordinator_DistributionTreeImpl.cpp:369\n  coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,\
+      \ unsigned long) at coordinator_TreeProcessingAlgorithmImpl.cpp:137"
+    kind: InvalidRead
+    stack:
+    - {file: null, fn: 'std::string::data() const', line: null}
+    - {file: null, fn: '__gnu_cxx::__enable_if<std::__is_char<char>::__value, bool>::__type
+        std::operator==<char>(std::basic_string<char, std::char_traits<char>, std::allocator<char>
+        > const&, std::basic_string<char, std::char_traits<char>, std::allocator<char>
+        > const&)', line: null}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/hls/hls_EncodingId.cpp,
+      fn: 'hls::EncodingId::operator==(hls::EncodingId const&) const', line: '42'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/hls/hls_StreamId.cpp,
+      fn: 'hls::StreamId::operator==(hls::StreamId const&) const', line: '51'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::RemoveStreamFromPresentations(hls::StreamId
+        const&)', line: '285'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::DestroyDistributionTree(coordinator::distribution::DistributionTree*)',
+      line: '267'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/networking/coordinator_ServerEventProcessor.cpp,
+      fn: 'coordinator::networking::ServerEventProcessor::DistributionTreeEmpty(coordinator::distribution::DistributionTree*)',
+      line: '433'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_DistributionTreeImpl.cpp,
+      fn: 'coordinator::distribution::DistributionTreeImpl::DeleteRootContact(coordinator::common::CoordinatorContact*)',
+      line: '369'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeProcessingAlgorithmImpl.cpp,
+      fn: 'coordinator::distribution::TreeProcessingAlgorithmImpl::ProcessRootPoints(coordinator::distribution::DistributionTree*,
+        unsigned long)', line: '137'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeProcessingAlgorithmImpl.cpp,
+      fn: 'coordinator::distribution::TreeProcessingAlgorithmImpl::WashDistributionTree(coordinator::distribution::DistributionTree*,
+        unsigned long, unsigned long)', line: '251'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/parts/libp2ptv/src/coordinator/distribution/coordinator_TreeManagerImpl.cpp,
+      fn: 'coordinator::distribution::DistributionManagerImpl::CleanTrees()', line: '55'}
+    - {file: /var/jenkins/workspace/bytefog_dev/CONFIGURATION/linux.properties/label/Debian-7-amd64/target/third-party/boost_1_55_0/boost/bind/mem_fn_template.hpp,
+      fn: 'boost::_mfi::mf0<void, coordinator::distribution::DistributionManagerImpl>::operator()(coordinator::distribution::DistributionManagerImpl*)
+        const', line: '49'}
+  binary_id: build-id:6fe4f1971b42bf59a4c2c0151814d2ef40883fa8
+

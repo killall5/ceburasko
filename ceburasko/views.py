@@ -227,7 +227,7 @@ def upload_accidents(request):
                 continue
             significant_frame = None
             for frame in reported_accident['stack']:
-                if 'file' not in frame or 'fn' not in frame:
+                if 'file' not in frame or not frame['file'] or 'fn' not in frame:
                     continue
                 for source_path in project.sourcepath_set.all():
                     if source_path.path_substring in frame['file']:
