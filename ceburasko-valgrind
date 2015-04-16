@@ -9,26 +9,34 @@ import signal
 from argparse import ArgumentParser
 from ceburasko.binary_id import binary_id
 
+
 def main():
     parser = ArgumentParser()
-    parser.add_argument('--valgrind-dir',
-        help = 'Valgrind log output directory',
-        default = None)
-    parser.add_argument('program',
-        help = 'Full path to your program')
-    parser.add_argument('args', metavar='arg',
-        nargs = '*',
-        help = 'Your program args')
+    parser.add_argument(
+        '--valgrind-dir',
+        help='Valgrind log output directory',
+        default=None,
+    )
+    parser.add_argument(
+        'program',
+        help='Full path to your program',
+    )
+    parser.add_argument(
+        'args',
+        metavar='arg',
+        nargs='*',
+        help='Your program args',
+    )
     args = parser.parse_args()
 
     binary_comment = binary_id(args.program)
     log_filename = tempfile.mkstemp(prefix='valgrind.', suffix='.log.part', dir=args.valgrind_dir)[1]
 
-    valgrind = [ '/usr/bin/valgrind' ]
-    valgrind += [ '--xml=yes', '--xml-file=%s' % log_filename ]
-    valgrind += [ '--xml-user-comment=%s' % binary_comment ]
-    valgrind += [ args.program ] + args.args
-    process = subprocess.Popen( valgrind )
+    valgrind = ['/usr/bin/valgrind']
+    valgrind += ['--xml=yes', '--xml-file=%s' % log_filename]
+    valgrind += ['--xml-user-comment=%s' % binary_comment]
+    valgrind += [args.program] + args.args
+    process = subprocess.Popen(valgrind)
     try:
         process.wait()
     except KeyboardInterrupt as ki:

@@ -23,4 +23,5 @@ urlpatterns = patterns('ceburasko.views',
     url(r'^project-(?P<project_id>\d+)/source-delete/(?P<source_id>\d+)/$', 'source_delete', name='source_delete'),
 
     url(r'^project-(?P<project_id>\d+)/kinds/$', 'kind_list', name='kinds'),
+    url(r'^project-(?P<project_id>\d+)/known-kinds/$', 'known_kind_list'),
 )

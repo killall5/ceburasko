@@ -6,10 +6,12 @@ import os
 import json
 from argparse import ArgumentParser
 
+
 def is_exe(path):
     if path.lower().endswith('.exe'):
         return True
-    return os.path.isfile(path) and os.access(path, os.X_OK) 
+    return os.path.isfile(path) and os.access(path, os.X_OK)
+
 
 def main():
     parser = ArgumentParser()
@@ -20,9 +22,9 @@ def main():
     basedir = args.basedir
 
     ids = {}
-    for dir, _, files in os.walk(basedir):
-        for file in files:
-            filename = os.path.join(dir, file)
+    for directory, _, files in os.walk(basedir):
+        for relative_filename in files:
+            filename = os.path.join(directory, relative_filename)
             if is_exe(filename):
                 component = os.path.relpath(filename, basedir)
                 id = binary_id(filename)

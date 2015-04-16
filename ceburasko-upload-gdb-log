@@ -6,10 +6,20 @@ from ceburasko.log_parsers import accidents_from_gdb_log
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument('gdblog',
-        help = 'log from gdb')
-    parser.add_argument('project_url',
-        help = 'Ceburasko project URL for upload crash stack')
+    parser.add_argument(
+        '--timeout',
+        help='Operation timeout',
+        type=int,
+        default=300,
+    )
+    parser.add_argument(
+        'gdblog',
+        help='log from gdb',
+    )
+    parser.add_argument(
+        'project_url',
+        help='Ceburasko project URL for upload crash stack',
+    )
     args = parser.parse_args()
 
     accidents = accidents_from_gdb_log(args.gdblog)

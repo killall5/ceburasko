@@ -393,3 +393,11 @@ def kind_list(request, project_id):
         'ceburasko/kind_list.html',
         {'project': p},
     )
+
+
+def known_kind_list(request, project_id):
+    p = get_object_or_404(Project, pk=project_id)
+    response = {}
+    for kp in KindPriority.objects.filter(project=p).all():
+        response[kp.kind] = kp.priority
+    return HttpResponse(yaml.dump(response))
