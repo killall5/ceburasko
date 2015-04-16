@@ -51,7 +51,7 @@ class UploadBinaryTest(TestCase):
 
 
 import gdb
-from gdb import errors_from_gdb_log
+from gdb import accidents_from_gdb_log
 import os.path
 
 
@@ -60,7 +60,7 @@ class GdbParseTest(TestCase):
         self.basedir = os.path.join(os.path.dirname(gdb.__file__), '')
 
     def test_assert_parsing(self):
-        errors = errors_from_gdb_log(self.basedir + 'data/01-gdb-abort.txt')
+        errors = accidents_from_gdb_log(self.basedir + 'data/01-gdb-abort.txt')
         errors = list(errors)
         self.assertEqual(len(errors), 1)
         error = errors[0]
@@ -71,12 +71,12 @@ class GdbParseTest(TestCase):
         self.assertEqual(error['stack'][0]['line'], '49')
 
     def test_unknown_binary_id(self):
-        errors = errors_from_gdb_log(self.basedir + 'data/02-000-gdb-unknown-binary-id.txt')
+        errors = accidents_from_gdb_log(self.basedir + 'data/02-000-gdb-unknown-binary-id.txt')
         errors = list(errors)
         self.assertEqual(len(errors), 0)
 
     def test_unknown_binary_id_2(self):
-        errors = errors_from_gdb_log(self.basedir + 'data/02-001-gdb-unknown-binary-id.txt')
+        errors = accidents_from_gdb_log(self.basedir + 'data/02-001-gdb-unknown-binary-id.txt')
         errors = list(errors)
         self.assertEqual(len(errors), 0)
 

@@ -203,6 +203,9 @@ def upload_accidents(request):
             response['reason'] = 'unknown binary'
             responses.append(response)
             continue
+        known_priorities = {}
+        for kp in KindPriority.objects.filter(project=project):
+            known_priorities[kp.kind] = kp.priority
         for reported_accident in case['accidents']:
             response = {}
             if 'kind' not in reported_accident:
@@ -211,8 +214,8 @@ def upload_accidents(request):
                 responses.append(response)
                 continue
             try:
-                priority_by_accident_kind = project.kindpriority_set.get(kind=reported_accident['kind']).priority
-            except ObjectDoesNotExist as e:
+                priority_by_accident_kind = known_priorities[reported_accident['kind']]
+            except KeyError as e:
                 # Ignore accident kinds without priority
                 response['action'] = 'ignored'
                 response['reason'] = 'unknown kind'
