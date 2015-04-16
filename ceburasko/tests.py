@@ -271,7 +271,14 @@ class UploadAccidentTest(TestCase):
         for r in response:
             self.assertEqual(r['action'], 'accepted')
         self.assertNotEqual(response[0]['issue'], response[1]['issue'])
-        self.assertNotEqual(response[2]['issue'], response[1]['issue'])
-        self.assertNotEqual(response[0]['issue'], response[2]['issue'])
-        for r in response[3:]:
-            self.assertEqual(response[0]['issue'], r['issue'])
+        self.assertNotEqual(response[0]['issue'], response[3]['issue'])
+        self.assertNotEqual(response[0]['issue'], response[5]['issue'])
+
+        self.assertEqual(response[1]['issue'], response[2]['issue'])
+        self.assertNotEqual(response[1]['issue'], response[3]['issue'])
+        self.assertNotEqual(response[1]['issue'], response[5]['issue'])
+
+        self.assertEqual(response[3]['issue'], response[4]['issue'])
+        self.assertNotEqual(response[3]['issue'], response[5]['issue'])
+
+        self.assertEqual(response[5]['issue'], response[6]['issue'])

@@ -226,6 +226,7 @@ def upload_accidents(request):
                 responses.append(response)
                 continue
             significant_frame = None
+            #import pdb; pdb.set_trace()
             for frame in reported_accident['stack']:
                 if 'file' not in frame or not frame['file'] or 'fn' not in frame:
                     continue
@@ -233,6 +234,8 @@ def upload_accidents(request):
                     if source_path.path_substring in frame['file']:
                         significant_frame = frame
                         break
+                if significant_frame:
+                    break
             if significant_frame is None:
                 # Unknown source? Ignore.
                 response['action'] = 'ignored'
