@@ -57,7 +57,7 @@ def main():
     valgrind += ['--xml-user-comment=%s' % binary_comment]
     valgrind += [args.program] + args.args
     process = subprocess.Popen(valgrind)
-    MyInterruptionHandler(process, logfile)
+    MyInterruptionHandler(process, log_filename)
     process.wait()
     os.rename(log_filename, log_filename.replace('.log.part', '.log.xml'))
 
