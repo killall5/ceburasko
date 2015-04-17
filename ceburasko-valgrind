@@ -8,6 +8,26 @@ import tempfile
 import signal
 from argparse import ArgumentParser
 from ceburasko.binary_id import binary_id
+from ceburasko.interruption_handler import InterruptionHandler
+
+
+class MyInterruptionHandler(InterruptionHandler):
+    def __init__(self, process, logfile, signum=signal.SIGINT):
+        super(MyInterruptionHandler, self).__init__(signum)
+        self.process = process
+        self.logfile = logfile
+
+    def on_signal(self, signum):
+        if self.process.poll() is None:
+            if os.name != 'nt':
+                self.process.terminate()
+            else:
+                self.process.send_signal(signum)
+        try:
+            self.process.wait()
+        except:
+            pass
+        os.rename(self.logfile, self.logfile.replace('.log.part', '.log.xml'))
 
 
 def main():
@@ -37,11 +57,8 @@ def main():
     valgrind += ['--xml-user-comment=%s' % binary_comment]
     valgrind += [args.program] + args.args
     process = subprocess.Popen(valgrind)
-    try:
-        process.wait()
-    except KeyboardInterrupt as ki:
-        process.send_signal(signal.SIGINT)
-        process.wait()
+    MyInterruptionHandler(process, logfile)
+    process.wait()
     os.rename(log_filename, log_filename.replace('.log.part', '.log.xml'))
 
 if __name__ == '__main__':
