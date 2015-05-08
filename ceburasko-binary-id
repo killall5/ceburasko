@@ -7,6 +7,6 @@ if __name__ == "__main__":
     import sys
     for filename in sys.argv[1:]:
         try:
-            print "%s %s" % (binary_id(file), file)
+            print "%s %s" % (binary_id(filename), filename)
         except Exception as e:
             print "%s: %s" % (sys.argv[0], e)

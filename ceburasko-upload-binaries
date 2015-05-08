@@ -1,16 +1,10 @@
 #!/usr/bin/env python
 
-from ceburasko.binary_id import binary_id
+from ceburasko.binary_id import binary_id, is_exe
 from ceburasko.api import upload_binary_info
 import os
 import json
 from argparse import ArgumentParser
-
-
-def is_exe(path):
-    if path.lower().endswith('.exe'):
-        return True
-    return os.path.isfile(path) and os.access(path, os.X_OK)
 
 
 def main():

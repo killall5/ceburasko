@@ -1,0 +1,5 @@
+configs/linux/coredump.conf /etc/sysctl.d
+configs/linux/allow-all-coredumps.conf /etc/security/limits.d
+configs/monit/python-ceburasko-uploader-coredump.conf /etc/monit/conf.d
+configs/uploaders/coredump.conf /etc/ceburasko-uploaders
+ceburasko-upload-coredump /usr/bin

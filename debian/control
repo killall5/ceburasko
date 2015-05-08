@@ -7,10 +7,22 @@ Standards-Version: 3.8.4
 
 Package: python-ceburasko
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, python-argparse, python-yaml, binutils
+Depends: ${misc:Depends}, ${python:Depends}, python-argparse, python-yaml, elfutils
 Conflicts: python-django (<< 1.7)
 Recommends: python-django (>= 1.7)
 XB-Python-Version: ${python:Versions}
 Provides: ${python:Provides}
 Description: Ceburasko Django app
  Django application for store crashes
+
+Package: python-ceburasko-uploader-coredump
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}, python-argparse, elfutils, gdb, procps, python-ceburasko (>= 3.0), inoticoming
+Conflicts: dump-mailer
+Description: Ceburasko accident uploader from coredumps
+
+Package: python-ceburasko-uploader-valgrind-log
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}, python-argparse, python-ceburasko (>= 3.0), inoticoming
+Conflicts: dump-mailer
+Description: Ceburasko accident uploader from valgrind logs

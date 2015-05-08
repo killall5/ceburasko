@@ -1,5 +1,3 @@
-fake:asdfasdf binary.exe
-end-of-binary-id.
 [New LWP 4433]
 [New LWP 4428]
 [Thread debugging using libthread_db enabled]
