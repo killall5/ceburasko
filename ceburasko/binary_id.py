@@ -12,7 +12,7 @@ class NoBuildId(Exception):
 
 
 def binary_id_from_elf_headers(filename):
-    readelf = Popen(["readelf", "-n", filename], stdout=PIPE, stderr=PIPE)
+    readelf = Popen(["eu-readelf", "-n", filename], stdout=PIPE, stderr=PIPE)
     if readelf.wait() != 0:
         raise ReadElfFailed(readelf.stderr.read().strip())
     for line in readelf.stdout.readlines():

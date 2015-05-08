@@ -11,6 +11,7 @@ def files(basedir, dirs):
             for filename in file_list:
                 yield os.path.relpath(os.path.join(path, filename), basedir)
 
+
 setup(
     name='ceburasko',
     version='3.0.11',
@@ -25,8 +26,6 @@ setup(
     scripts=[
         'ceburasko-binary-id',
         'ceburasko-upload-binaries',
-        'ceburasko-upload-gdb-log',
-        'ceburasko-upload-valgrind-log',
         'ceburasko-valgrind',
     ],
     license="GPLv2",
