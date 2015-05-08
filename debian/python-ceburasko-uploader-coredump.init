@@ -49,7 +49,7 @@ DAEMON_ARGS="--pid-file $PIDFILE \
     --stderr-to-log \
     --stdout-to-log \
     --chdir $CORES_DIR \
-    /usr/bin/python-ceburasko-uploader-coredump {} $CEBURASKO_PROJECT ; "
+    /usr/bin/ceburasko-upload-coredump {} $CEBURASKO_PROJECT ; "
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
