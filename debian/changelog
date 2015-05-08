@@ -1,3 +1,9 @@
+ceburasko (3.1.0-1) unstable; urgency=high
+
+  * split ceburasko uploaders to packages
+
+ -- Alexey Tamarevskiy <mirror@inetra.ru>  Fri, 08 May 2015 17:54:32 +0600
+
 ceburasko (3.0.11-1) stable; urgency=high
 
   * Brand-new ceburasko
