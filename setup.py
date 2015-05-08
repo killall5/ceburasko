@@ -27,6 +27,7 @@ setup(
         'ceburasko-binary-id',
         'ceburasko-upload-binaries',
         'ceburasko-valgrind',
+        'ceburasko-find-binary-id',
     ],
     license="GPLv2",
 )
