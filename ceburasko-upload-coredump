@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser
 from ceburasko.api import upload_accidents
-from ceburasko.log_parsers import accidents_from_gdb_log
+from ceburasko.log_parsers import accidents_from_coredump
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -22,5 +22,5 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    #accidents = accidents_from_gdb_log(args.gdblog)
-    #upload_accidents(accidents, args.project_url)
+    accidents = accidents_from_coredump(args.coredump)
+    upload_accidents(accidents, args.project_url)

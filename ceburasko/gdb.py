@@ -74,8 +74,10 @@ def accident_from_coredump(coredump):
     binary = find_by_binary_id(binary_id)
     if not binary:
         return
+
     gdb = Popen(["gdb", "--batch", "--quiet", "-ex", "thread apply all bt full", "-ex", "quit", binary, coredump], stdout=PIPE)
     annotation, _ = gdb.communicate()
+
     for accident in parse_gdb(annotation.split('\n')):
         accident['annotation'] = annotation
         accident['binary_id'] = binary_id
