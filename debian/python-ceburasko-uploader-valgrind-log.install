@@ -1,2 +1,3 @@
 ceburasko-upload-valgrind-log /usr/bin
-configs/valgrind-log.conf /etc/ceburasko-uploaders
+configs/monit/python-ceburasko-uploader-valgrind-log.conf /etc/monit/conf.d
+configs/uploaders/valgrind-log.conf /etc/ceburasko-uploaders
