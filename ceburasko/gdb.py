@@ -1,4 +1,6 @@
 import re
+from subprocess import Popen, PIPE
+from binary_id import binary_id_from_coredump, find_by_binary_id
 
 
 def line_generator(data):
@@ -64,25 +66,17 @@ def parse_gdb(input_stream):
         yield crash
 
 
-def accidents_from_gdb_log(filename):
-    with open(filename) as f:
-        log = f.read().split('\n')
-
-    binary_id = None
+def accident_from_coredump(coredump):
     try:
-        ind = log.index('end-of-binary-id.')
-        if ind > 0:
-            binary_id = log[0].split()[0]
-        log = log[ind+1:]
+        binary_id = binary_id_from_coredump(coredump)
     except:
-        # gdb log must be prepended with exe ids
         return
-
-    if binary_id is None:
+    binary = find_by_binary_id(binary_id)
+    if not binary:
         return
-
-    annotation = '\n'.join(log)
-    for accident in parse_gdb(log):
+    gdb = Popen(["gdb", "--batch", "--quiet", "-ex", "thread apply all bt full", "-ex", "quit", binary, coredump], stdout=PIPE)
+    annotation, _ = gdb.communicate()
+    for accident in parse_gdb(annotation.split('\n')):
         accident['annotation'] = annotation
         accident['binary_id'] = binary_id
         yield accident

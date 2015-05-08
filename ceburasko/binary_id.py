@@ -45,3 +45,53 @@ def binary_id(filename):
             return binary_id_from_elf_headers(filename)
         except:
             return binary_id_from_content(filename)
+
+
+def is_exe(path):
+    if path.lower().endswith('.exe'):
+        return True
+    return os.path.isfile(path) and os.access(path, os.X_OK)
+
+
+import sqlite3
+
+
+def find_by_binary_id(needle_id, paths = [], cache = 'binary_id_cache.db'):
+    if cache:
+        conn = sqlite3.connect(cache)
+        cur = conn.cursor()
+        try:
+            cur.execute('create table binary_id_cache(binary_id, abs_path)')
+        except:
+            pass
+        cur.execute('select abs_path from binary_id_cache where binary_id = ?', (needle_id, ))
+        res = cur.fetchone()
+        if res:
+            res = res[0]
+            try:
+                real_id = binary_id(res)
+                if real_id == needle_id:
+                    cur.close()
+                    conn.close()
+                    return res
+            except:
+                pass
+            cur.execute('delete from binary_id_cache where binary_id = ?', (needle_id, ))
+    if not paths:
+        paths = os.getenv("PATH", ".").split(":")
+    for path in paths:
+        for dirpath, dirnames, filenames in os.walk(path):
+            for filename in filenames:
+                abs_path = os.path.join(dirpath, filename)
+                if is_exe(abs_path):
+                    if binary_id(abs_path) == needle_id:
+                        if cache:
+                            try:
+                                cur.execute('insert into binary_id_cache values(?, ?)', (needle_id, abs_path))
+                            except Exception as e:
+                                print e
+                                cur.execute('update binary_id_cache set abs_path = ? where binary_id = ?', (abs_path, needle_id))
+                            cur.close()
+                            conn.commit()
+                            conn.close()
+                        return abs_path
