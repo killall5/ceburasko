@@ -16,6 +16,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="coredump uploader to ceburasko"
 NAME=python-ceburasko-uploader-coredump
+CONFIG=/etc/ceburasko-uploaders/coredump.conf
 PIDFILE=/var/run/$NAME.pid
 DAEMON=/usr/bin/inoticoming
 SCRIPTNAME=/etc/init.d/$NAME
@@ -24,7 +25,7 @@ SCRIPTNAME=/etc/init.d/$NAME
 [ -x "$DAEMON" ] || exit 0
 
 # Read configuration variable file if it is present
-[ -r /etc/$NAME.conf ] && . /etc/$NAME.conf
+[ -r $CONFIG ] && . $CONFIG
 
 CORES_DIR=$(dirname $(sysctl -n kernel.core_pattern))
 
@@ -36,7 +37,7 @@ if [ -z "$CORES_DIR" -o "$CORES_DIR" = "." ]; then
 fi
 
 if [ -z "$CEBURASKO_PROJECT" ]; then
-	printf "Edit the \"/etc/$NAME.conf\" file\n"
+	printf "Edit the \"$CONFIG\" file\n"
 	printf "and set the CEBURASKO_PROJECT variable\n"
 	printf "to enable upload coredumps to ceburasko.\n"
 	exit 0

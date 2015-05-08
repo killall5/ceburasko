@@ -1,1 +1,2 @@
 ceburasko-upload-valgrind-log /usr/bin
+configs/valgrind-log.conf /etc/ceburasko-uploaders

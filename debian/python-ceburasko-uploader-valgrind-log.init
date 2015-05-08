@@ -16,6 +16,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Uploader valgrind logs to ceburasko"
 NAME=python-ceburasko-uploader-valgrind-log
+CONFIG=/etc/ceburasko-uploaders/valgrind-log.conf
 PIDFILE=/var/run/$NAME.pid
 DAEMON=/usr/bin/inoticoming
 SCRIPTNAME=/etc/init.d/$NAME
@@ -24,10 +25,10 @@ SCRIPTNAME=/etc/init.d/$NAME
 [ -x "$DAEMON" ] || exit 0
 
 # Read configuration variable file if it is present
-[ -r /etc/$NAME.conf ] && . /etc/$NAME.conf
+[ -r $CONFIG ] && . $CONFIG
 
 if [ -z "$VALGRIND_DIR" ]; then
-	printf "Edit the \"/etc/$NAME.conf\" file\n"
+	printf "Edit the \"$CONFIG\" file\n"
 	printf "and set the VALGRIND_DIR variable\n"
 	printf "to enable startup.\n"
 	exit 0
