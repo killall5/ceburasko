@@ -17,12 +17,12 @@ Description: Ceburasko Django app
 
 Package: python-ceburasko-uploader-coredump
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, elfutils, gdb, procps, python-ceburasko (>= 3.0), inoticoming
+Depends: ${misc:Depends}, ${python:Depends}, python-argparse, elfutils, gdb, procps, python-ceburasko (>= 3.0), inoticoming
 Conflicts: dump-mailer
 Description: Ceburasko accident uploader from coredumps
 
 Package: python-ceburasko-uploader-valgrind-log
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, python-ceburasko (>= 3.0), inoticoming
+Depends: ${misc:Depends}, ${python:Depends}, python-argparse, python-ceburasko (>= 3.0), inoticoming
 Conflicts: dump-mailer
 Description: Ceburasko accident uploader from valgrind logs
