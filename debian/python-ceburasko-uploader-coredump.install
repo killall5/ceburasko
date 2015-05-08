@@ -1,1 +1,4 @@
-debian/tmp/* /
+coredump.conf /etc/sysctl.d
+allow-all-coredumps.conf /etc/security/limits.d
+python-ceburasko-uploader-coredump-monit.conf /etc/monit/conf.d
+ceburasko-upload-coredump /usr/bin
