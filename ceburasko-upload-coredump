@@ -2,7 +2,8 @@
 
 from argparse import ArgumentParser
 from ceburasko.api import upload_accidents
-from ceburasko.log_parsers import accidents_from_coredump
+from ceburasko.log_parsers import accident_from_coredump
+import os
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -22,5 +23,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    accidents = accidents_from_coredump(args.coredump)
-    upload_accidents(accidents, args.project_url)
+    accident = accident_from_coredump(args.coredump)
+    upload_accidents(accident, args.project_url)
+    os.unlink(args.coredump)
