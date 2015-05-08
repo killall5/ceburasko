@@ -11,4 +11,6 @@ then
     pycentral pkgremove python-ceburasko
 fi
 
+install -d -m 1777 /var/cache/ceburasko
+
 #DEBHELPER#

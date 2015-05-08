@@ -71,7 +71,7 @@ def accident_from_coredump(coredump):
         binary_id = binary_id_from_coredump(coredump)
     except:
         return
-    binary = find_by_binary_id(binary_id)
+    binary = find_by_binary_id(binary_id, cache='/var/cache/ceburasko/binary_id_cache.db')
     if not binary:
         return
 
