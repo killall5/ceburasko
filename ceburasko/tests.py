@@ -60,7 +60,7 @@ class GdbParseTest(TestCase):
         self.basedir = os.path.join(os.path.dirname(gdb.__file__), '')
 
     def test_assert_parsing(self):
-        with open(self.basedir + 'data/01-gdb-abort.txt')) as f:
+        with open(self.basedir + 'data/01-gdb-abort.txt') as f:
             errors = parse_gdb(f)
         errors = list(errors)
         self.assertEqual(len(errors), 1)
