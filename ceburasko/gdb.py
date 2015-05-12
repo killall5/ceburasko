@@ -42,15 +42,11 @@ def parse_gdb(input_stream):
             state = 2
             continue
         if state == 2:
-            if len(line) == 0:
-                state = 3
-            continue
-        if state == 3:
             if line == crash['line']:
-                state = 4
+                state = 3
                 crash['data'] = []
                 # do not continue!
-        if state == 4:
+        if state == 3:
             if line:
                 crash['data'].append(line)
             else:
@@ -75,7 +71,8 @@ def accident_from_coredump(coredump):
     if not binary:
         return
 
-    gdb = Popen(["gdb", "--batch", "--quiet", "-ex", "thread apply all bt full", "-ex", "quit", binary, coredump], stdout=PIPE)
+    # TODO: get stack for all threads (bug in wheezy gdb?)
+    gdb = Popen(["gdb", "--batch", "--quiet", "-ex", "bt full", "-ex", "quit", binary, coredump], stdout=PIPE)
     annotation, _ = gdb.communicate()
 
     for accident in parse_gdb(annotation.split('\n')):
