@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from argparse import ArgumentParser
-from ceburasko.api import upload_accidents
+from ceburasko.api import upload_accidents, UploadDataError
 from ceburasko.log_parsers import accident_from_coredump
 import os
 
@@ -23,6 +23,12 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    accident = accident_from_coredump(args.coredump)
-    upload_accidents(accident, args.project_url)
-    os.unlink(args.coredump)
+    should_cleanup = True
+    try:
+        accident = accident_from_coredump(args.coredump)
+        upload_accidents(accident, args.project_url)
+    except UploadDataError as e:
+        should_cleanup = False
+    finally:
+        if should_cleanup:
+            os.unlink(args.coredump)

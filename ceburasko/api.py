@@ -4,10 +4,17 @@ import os
 from urlparse import urljoin
 
 
+class UploadDataError(RuntimeError):
+    pass
+
+
 def upload_data(url, data, timeout=10):
     data = yaml.dump(data)
     request = urllib2.Request(url, data, {'Content-Type': 'application/x-yaml'})
-    return urllib2.urlopen(request, timeout=timeout)
+    try:
+        return urllib2.urlopen(request, timeout=timeout)
+    except Exception as e:
+        raise UploadDataError(e)
 
 
 def upload_binary_info(version, ids, project_url, timeout=10):
