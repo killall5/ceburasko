@@ -49,8 +49,7 @@ DAEMON_ARGS="--pid-file $PIDFILE \
     --stdout-to-log \
     --prefix valgrind. \
     --suffix .log.xml \
-    --chdir $VALGRIND_DIR \
-    /usr/bin/ceburasko-upload-valgrind-log {} $CEBURASKO_PROJECT ; "
+    /usr/bin/ceburasko-upload-valgrind-log ${VALGRIND_DIR}/{} $CEBURASKO_PROJECT ; "
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
