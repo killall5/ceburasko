@@ -8,6 +8,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from django.db.models import Count
+from django.conf import settings
 from context_processors import set_default_order, to_order_by
 import hashlib
 
@@ -404,3 +405,35 @@ def known_kind_list(request, project_id):
     for kp in KindPriority.objects.filter(project=p).all():
         response[kp.kind] = kp.priority
     return HttpResponse(yaml.dump(response))
+
+
+@csrf_exempt
+def upload_breakpad_symbol(request, project_id):
+    p = get_object_or_404(Project, pk=project_id)
+    version = Version(request.POST['version'])
+    try:
+        build = p.build_set.get(version=version)
+    except ObjectDoesNotExist as e:
+        build = p.build_set.create(version=version)
+    debug_identifier = request.POST['debug_identifier']
+    debug_filename = request.POST['debug_file']
+    binary_id = 'breakpad:%s' % debug_identifier
+    try:
+        build.binary_set.get(hash=binary_id)
+    except ObjectDoesNotExist as e:
+        build.binary_set.create(hash=binary_id, filename=debug_filename)
+    symbol_dir = '%(base)s/%(debug_filename)s/%(debug_identifier)s/' % {
+        'base': settings.BREAKPAD_SYMBOLS_PATH,
+        'debug_identifier': debug_identifier,
+        'debug_filename': debug_filename,
+    }
+    import os
+    try:
+        os.makedirs(symbol_dir)
+    except:
+        pass
+    symbol_filename = '%s/%s.sym' % (symbol_dir, debug_filename)
+    with open(symbol_filename, 'w') as symbol_file:
+        for chunk in request.FILES['symbol_file'].chunks():
+            symbol_file.write(chunk)
+    return HttpResponse(status=200)
