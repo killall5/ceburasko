@@ -10,6 +10,7 @@ from django.template import RequestContext
 from django.db.models import Count
 from django.conf import settings
 from context_processors import set_default_order, to_order_by
+from ceburasko.utils import create_or_update_issue, UnknownSourceError
 import hashlib
 import os
 
@@ -228,56 +229,23 @@ def upload_accidents(request):
                     unknown_kinds[reported_accident['kind']] = 1
                 responses.append(response)
                 continue
-            significant_frame = None
-            #import pdb; pdb.set_trace()
-            for frame in reported_accident['stack']:
-                if 'file' not in frame or not frame['file'] or 'fn' not in frame:
-                    continue
-                for source_path in project.sourcepath_set.all():
-                    if source_path.path_substring in frame['file']:
-                        significant_frame = frame
-                        break
-                if significant_frame:
-                    break
-            if significant_frame is None:
-                # Unknown source? Ignore.
+            try:
+                issue, accident = create_or_update_issue(
+                    affected_binary,
+                    reported_accident,
+                    request.META.get('REMOTE_ADDR'),
+                    priority_by_accident_kind
+                )
+            except UnknownSourceError as e:
                 response['action'] = 'ignored'
                 response['reason'] = 'unknown source'
                 responses.append(response)
                 continue
-            search_hash = hashlib.md5()
-            search_hash.update(significant_frame['fn'])
-            search_hash = search_hash.hexdigest()
-            try:
-                issue = project.issue_set.filter(hash=search_hash, kind=reported_accident['kind'])[0]
-                issue.last_affected_version = max(issue.last_affected_version, affected_build.version)
-                modified_issues.append(issue)
-            except (ObjectDoesNotExist, IndexError) as e:
-                issue = project.issue_set.create(
-                    hash=search_hash,
-                    kind=reported_accident['kind'],
-                    title="%s in %s" % (reported_accident['kind'], significant_frame['fn']),
-                    priority=priority_by_accident_kind,
-                    first_affected_version=affected_build.version,
-                    last_affected_version=affected_build.version,
-                )
+
             response['action'] = 'accepted'
             response['issue'] = issue.id
             response['project'] = issue.project.id
             responses.append(response)
-
-            accident = Accident(
-                issue=issue,
-                build=affected_build,
-                binary=affected_binary,
-                ip=request.META.get('REMOTE_ADDR')
-            )
-            if 'annotation' in reported_accident:
-                accident.annotation = reported_accident['annotation']
-            accident.save()
-
-            for i, frame in enumerate(reported_accident['stack']):
-                Frame.objects.create(accident=accident, pos=i, **frame)
 
     for kind, count in unknown_kinds.items():
         try:

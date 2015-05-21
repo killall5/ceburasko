@@ -61,8 +61,7 @@ class GdbParseTest(TestCase):
 
     def test_assert_parsing(self):
         with open(self.basedir + 'data/01-gdb-abort.txt') as f:
-            errors = parse_gdb(f)
-        errors = list(errors)
+            errors = list(parse_gdb(f))
         self.assertEqual(len(errors), 1)
         error = errors[0]
         self.assertEqual(error['kind'], 'killed')
