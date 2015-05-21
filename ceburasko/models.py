@@ -74,6 +74,7 @@ class Accident(Model):
     datetime = DateTimeField(auto_now_add=True, blank=True)
     ip = IPAddressField()
     annotation = TextField(null=True, blank=True)
+    user_id = CharField(max_length=40, null=True)
 
     def __unicode__(self):
         return "Accident #%d" % (self.id, )
@@ -156,3 +157,9 @@ class ForeignIssue(Model):
     def url(self):
         return self.tracker.get_issue_property(self.key, 'url')
 
+
+class Minidump(Model):
+    user_id = CharField(max_length=40)
+    ip_address = IPAddressField()
+    filepath = CharField(max_length=256)
+    modified_time = DateTimeField(auto_now_add=True, blank=True)

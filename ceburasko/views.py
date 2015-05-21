@@ -11,6 +11,8 @@ from django.db.models import Count
 from django.conf import settings
 from context_processors import set_default_order, to_order_by
 import hashlib
+import os
+
 
 """
  Helper for paginate source
@@ -422,18 +424,40 @@ def upload_breakpad_symbol(request, project_id):
         build.binary_set.get(hash=binary_id)
     except ObjectDoesNotExist as e:
         build.binary_set.create(hash=binary_id, filename=debug_filename)
-    symbol_dir = '%(base)s/%(debug_filename)s/%(debug_identifier)s/' % {
-        'base': settings.BREAKPAD_SYMBOLS_PATH,
-        'debug_identifier': debug_identifier,
-        'debug_filename': debug_filename,
-    }
-    import os
+    symbol_dir = os.path.join(
+        settings.BREAKPAD_SYMBOLS_PATH,
+        debug_identifier,
+        debug_filename,
+    )
     try:
         os.makedirs(symbol_dir)
     except:
         pass
-    symbol_filename = '%s/%s.sym' % (symbol_dir, debug_filename)
+    symbol_filename = os.path.join(symbol_dir, debug_filename)
     with open(symbol_filename, 'w') as symbol_file:
         for chunk in request.FILES['symbol_file'].chunks():
             symbol_file.write(chunk)
+    return HttpResponse(status=200)
+
+
+@csrf_exempt
+def upload_minidump(request):
+    try:
+        user_id = request.POST['uid']
+    except KeyError as e:
+        return HttpResponse(status=400)
+    ip = request.META.get('REMOTE_ADDR')
+    for minidump in request.FILES.values():
+        dir = os.path.join(settings.BREAKPAD_MINIDUMPS_PATH,
+                           minidump.name[:1],
+                           minidump.name[:2])
+        try:
+            os.makedirs(dir)
+        except:
+            pass
+        minidump_filepath = os.path.join(dir, minidump.name)
+        Minidump.objects.create(user_id=user_id, ip_address=ip, filepath=minidump_filepath)
+        with open(minidump_filepath, 'w') as f:
+            for chunk in minidump.chunks():
+                f.write(chunk)
     return HttpResponse(status=200)
