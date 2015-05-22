@@ -394,8 +394,8 @@ def upload_breakpad_symbol(request, project_id):
         build.binary_set.create(hash=binary_id, filename=debug_filename)
     symbol_dir = os.path.join(
         settings.BREAKPAD_SYMBOLS_PATH,
-        debug_identifier,
         debug_filename,
+        debug_identifier,
     )
     try:
         os.makedirs(symbol_dir)
