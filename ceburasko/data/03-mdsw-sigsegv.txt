@@ -1,0 +1,11 @@
+OS|Linux|0.0.0 Linux 3.2.0-4-amd64 #1 SMP Debian 3.2.68-1+deb7u1 x86_64
+CPU|amd64|family 6 model 2 stepping 3|5
+Crash|SIGSEGV|0x0|0
+Module|a.out||a.out|6CEF07123242D923EFA6DB30F66565490|0x00400000|0x004defff|1
+Module|linux-gate.so||linux-gate.so|56593CE3D334B33770BFB691DC5DB4500|0x7ffec6bf7000|0x7ffec6bf7fff|0
+
+0|0|a.out|crash()|/home/mirror/test.cpp|15|0x4
+0|1|a.out|main|/home/mirror/test.cpp|28|0x5
+0|2|a.out||||0x27023
+0|3|a.out||||0x7c9
+0|4|||||0x7ffec6bf7000

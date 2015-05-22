@@ -10,7 +10,10 @@ urlpatterns = patterns('ceburasko.views',
     url(r'^project-(?P<project_id>\d+)/issues/fixed/$', 'issue_list', {'is_fixed': True}, name='fixed-issues'),
 
     url(r'^project-(?P<project_id>\d+)/upload-binaries/$', 'upload_binaries'),
+    url(r'^project-(?P<project_id>\d+)/upload-symbol/$', 'upload_breakpad_symbol'),
+
     url(r'^upload-accidents/$', 'upload_accidents'),
+    url(r'^upload-minidump/$', 'upload_minidump'),
 
     url(r'^issue-(?P<issue_id>\d+)/$', 'issue_details', name='issue_details'),
     url(r'^issue-(?P<issue_id>\d+)/modify/$', 'issue_modify', name='issue_modify'),

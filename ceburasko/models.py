@@ -13,11 +13,17 @@ class SourcePath(Model):
     project = ForeignKey(Project)
     path_substring = CharField(max_length=255)
 
+    def __unicode__(self):
+        return self.path_substring
+
 
 class KindPriority(Model):
     project = ForeignKey(Project)
     kind = CharField(max_length=150)
     priority = IntegerField(default=0)
+
+    def __unicode__(self):
+        return "'%s', prio %d" % (self.kind, self.priority)
 
 
 class UnknownKind(Model):
@@ -74,6 +80,7 @@ class Accident(Model):
     datetime = DateTimeField(auto_now_add=True, blank=True)
     ip = IPAddressField()
     annotation = TextField(null=True, blank=True)
+    user_id = CharField(max_length=40, null=True)
 
     def __unicode__(self):
         return "Accident #%d" % (self.id, )
@@ -156,3 +163,9 @@ class ForeignIssue(Model):
     def url(self):
         return self.tracker.get_issue_property(self.key, 'url')
 
+
+class Minidump(Model):
+    user_id = CharField(max_length=40)
+    ip_address = IPAddressField()
+    filepath = CharField(max_length=256)
+    modified_time = DateTimeField(auto_now_add=True, blank=True)

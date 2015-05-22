@@ -8,8 +8,12 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from django.db.models import Count
+from django.conf import settings
 from context_processors import set_default_order, to_order_by
+from ceburasko.utils import create_or_update_issue, UnknownSourceError
 import hashlib
+import os
+
 
 """
  Helper for paginate source
@@ -225,56 +229,23 @@ def upload_accidents(request):
                     unknown_kinds[reported_accident['kind']] = 1
                 responses.append(response)
                 continue
-            significant_frame = None
-            #import pdb; pdb.set_trace()
-            for frame in reported_accident['stack']:
-                if 'file' not in frame or not frame['file'] or 'fn' not in frame:
-                    continue
-                for source_path in project.sourcepath_set.all():
-                    if source_path.path_substring in frame['file']:
-                        significant_frame = frame
-                        break
-                if significant_frame:
-                    break
-            if significant_frame is None:
-                # Unknown source? Ignore.
+            try:
+                issue, accident = create_or_update_issue(
+                    affected_binary,
+                    reported_accident,
+                    request.META.get('REMOTE_ADDR'),
+                    priority_by_accident_kind
+                )
+            except UnknownSourceError as e:
                 response['action'] = 'ignored'
                 response['reason'] = 'unknown source'
                 responses.append(response)
                 continue
-            search_hash = hashlib.md5()
-            search_hash.update(significant_frame['fn'])
-            search_hash = search_hash.hexdigest()
-            try:
-                issue = project.issue_set.filter(hash=search_hash, kind=reported_accident['kind'])[0]
-                issue.last_affected_version = max(issue.last_affected_version, affected_build.version)
-                modified_issues.append(issue)
-            except (ObjectDoesNotExist, IndexError) as e:
-                issue = project.issue_set.create(
-                    hash=search_hash,
-                    kind=reported_accident['kind'],
-                    title="%s in %s" % (reported_accident['kind'], significant_frame['fn']),
-                    priority=priority_by_accident_kind,
-                    first_affected_version=affected_build.version,
-                    last_affected_version=affected_build.version,
-                )
+
             response['action'] = 'accepted'
             response['issue'] = issue.id
             response['project'] = issue.project.id
             responses.append(response)
-
-            accident = Accident(
-                issue=issue,
-                build=affected_build,
-                binary=affected_binary,
-                ip=request.META.get('REMOTE_ADDR')
-            )
-            if 'annotation' in reported_accident:
-                accident.annotation = reported_accident['annotation']
-            accident.save()
-
-            for i, frame in enumerate(reported_accident['stack']):
-                Frame.objects.create(accident=accident, pos=i, **frame)
 
     for kind, count in unknown_kinds.items():
         try:
@@ -404,3 +375,57 @@ def known_kind_list(request, project_id):
     for kp in KindPriority.objects.filter(project=p).all():
         response[kp.kind] = kp.priority
     return HttpResponse(yaml.dump(response))
+
+
+@csrf_exempt
+def upload_breakpad_symbol(request, project_id):
+    p = get_object_or_404(Project, pk=project_id)
+    version = Version(request.POST['version'])
+    try:
+        build = p.build_set.get(version=version)
+    except ObjectDoesNotExist as e:
+        build = p.build_set.create(version=version)
+    debug_identifier = request.POST['debug_identifier']
+    debug_filename = request.POST['debug_file']
+    binary_id = 'breakpad:%s' % debug_identifier
+    try:
+        build.binary_set.get(hash=binary_id)
+    except ObjectDoesNotExist as e:
+        build.binary_set.create(hash=binary_id, filename=debug_filename)
+    symbol_dir = os.path.join(
+        settings.BREAKPAD_SYMBOLS_PATH,
+        debug_filename,
+        debug_identifier,
+    )
+    try:
+        os.makedirs(symbol_dir)
+    except:
+        pass
+    symbol_filename = os.path.join(symbol_dir, debug_filename + '.sym')
+    with open(symbol_filename, 'w') as symbol_file:
+        for chunk in request.FILES['symbol_file'].chunks():
+            symbol_file.write(chunk)
+    return HttpResponse(status=200)
+
+
+@csrf_exempt
+def upload_minidump(request):
+    try:
+        user_id = request.POST['uid']
+    except KeyError as e:
+        return HttpResponse(status=400)
+    ip = request.META.get('REMOTE_ADDR')
+    for minidump in request.FILES.values():
+        dir = os.path.join(settings.BREAKPAD_MINIDUMPS_PATH,
+                           minidump.name[:1],
+                           minidump.name[:2])
+        try:
+            os.makedirs(dir)
+        except:
+            pass
+        minidump_filepath = os.path.join(dir, minidump.name)
+        Minidump.objects.create(user_id=user_id, ip_address=ip, filepath=minidump_filepath)
+        with open(minidump_filepath, 'w') as f:
+            for chunk in minidump.chunks():
+                f.write(chunk)
+    return HttpResponse(status=200)
