@@ -9,14 +9,18 @@ def parse_minidump(input_stream):
     state = 0
     crash = {'ids': [], 'stack': []}
     for line in input_stream:
+        line = line.strip()
         fields = line.split('|')
-        if not fields:
+        if not line:
             if state == 0:
                 state = 1
             continue
         if state == 0:
             if fields[0] == 'Crash':
-                crash['kind'] = 'killed'
+                if fields[1] == 'DUMP_REQUESTED':
+                    crash['kind'] = 'dump'
+                else:
+                    crash['kind'] = 'killed'
                 crash['subtype'] = fields[1]
                 crash['thread'] = fields[3]
             if fields[0] == 'Module':

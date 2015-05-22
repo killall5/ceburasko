@@ -57,10 +57,10 @@ import os.path
 
 class GdbParseTest(TestCase):
     def setUp(self):
-        self.basedir = os.path.join(os.path.dirname(gdb.__file__), '')
+        self.basedir = os.path.dirname(gdb.__file__)
 
     def test_assert_parsing(self):
-        with open(self.basedir + 'data/01-gdb-abort.txt') as f:
+        with open(os.path.join(self.basedir, 'data/01-gdb-abort.txt')) as f:
             errors = list(parse_gdb(f))
         self.assertEqual(len(errors), 1)
         error = errors[0]
@@ -70,9 +70,52 @@ class GdbParseTest(TestCase):
         self.assertEqual(error['stack'][0]['line'], '49')
 
 
+import stackwalk
+
+
+class MinidumpParseTest(TestCase):
+    def setUp(self):
+        self.basedir = os.path.dirname(stackwalk.__file__)
+
+    def test_parse_sigsegv(self):
+        with open(os.path.join(self.basedir, 'data/01-mdsw-sigabrt.txt')) as f:
+            error = list(stackwalk.parse_minidump(f))[0]
+
+        self.assertEqual(error['kind'], 'killed')
+        self.assertNotIn('file', error['stack'][0])
+        self.assertNotIn('fn', error['stack'][0])
+        self.assertNotIn('line', error['stack'][0])
+        self.assertEqual(error['stack'][3]['fn'], 'main')
+        self.assertEqual(error['stack'][3]['file'], '/home/mirror/test.cpp')
+        self.assertEqual(error['stack'][3]['line'], '29')
+
+    def test_parse_dump_requested(self):
+        with open(os.path.join(self.basedir, 'data/02-mdsw-dump-requested.txt')) as f:
+            error = list(stackwalk.parse_minidump(f))[0]
+
+        self.assertEqual(error['kind'], 'dump')
+        self.assertNotIn('file', error['stack'][0])
+        self.assertNotIn('fn', error['stack'][0])
+        self.assertNotIn('line', error['stack'][0])
+        self.assertEqual(error['stack'][2]['fn'], 'main')
+        self.assertEqual(error['stack'][2]['file'], '/home/mirror/test.cpp')
+        self.assertEqual(error['stack'][2]['line'], '28')
+
+    def test_parse_sigabrt(self):
+        with open(os.path.join(self.basedir, 'data/03-mdsw-sigsegv.txt')) as f:
+            error = list(stackwalk.parse_minidump(f))[0]
+
+        self.assertEqual(error['kind'], 'killed')
+        self.assertEqual(error['stack'][0]['fn'], 'crash()')
+        self.assertEqual(error['stack'][0]['file'], '/home/mirror/test.cpp')
+        self.assertEqual(error['stack'][0]['line'], '15')
+        self.assertEqual(error['stack'][1]['fn'], 'main')
+        self.assertEqual(error['stack'][1]['file'], '/home/mirror/test.cpp')
+        self.assertEqual(error['stack'][1]['line'], '28')
+
 class UploadAccidentTest(TestCase):
     def setUp(self):
-        self.basedir = os.path.join(os.path.dirname(gdb.__file__), '')
+        self.basedir = os.path.dirname(gdb.__file__)
         self.project = Project.objects.create(name='FooBar')
         SourcePath.objects.create(project=self.project, path_substring='/foobar/')
         KindPriority.objects.create(project=self.project, kind='killed', priority=100)
@@ -246,7 +289,7 @@ class UploadAccidentTest(TestCase):
         self.assertNotEqual(responses[0]['issue'], responses[1]['issue'])
 
     def test_speed_test(self):
-        with open(self.basedir + 'data/upload-accidents.yaml') as f:
+        with open(os.path.join(self.basedir, 'data/upload-accidents.yaml')) as f:
             payload = f.read()
 
         Binary.objects.create(build=self.build, hash='build-id:6fe4f1971b42bf59a4c2c0151814d2ef40883fa8', filename='bin/bash', )
