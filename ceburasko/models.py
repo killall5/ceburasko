@@ -13,11 +13,17 @@ class SourcePath(Model):
     project = ForeignKey(Project)
     path_substring = CharField(max_length=255)
 
+    def __unicode__(self):
+        return self.path_substring
+
 
 class KindPriority(Model):
     project = ForeignKey(Project)
     kind = CharField(max_length=150)
     priority = IntegerField(default=0)
+
+    def __unicode__(self):
+        return "'%s', prio %d" % (self.kind, self.priority)
 
 
 class UnknownKind(Model):

@@ -40,8 +40,7 @@ def parse_minidump(input_stream):
         yield crash
 
 def accident_from_minidump(minidump_filename, symbols_dir):
-    stackwalk = Popen(['timeout', '-s', 'KILL', '30', 'minidump_stackwalk', '-m', minidump_filename, symbols_dir],
-                      stdout=PIPE)
+    stackwalk = Popen(['minidump_stackwalk', '-m', minidump_filename, symbols_dir], stdout=PIPE)
     stackwalk_output, _ = stackwalk.communicate()
     if stackwalk.wait() != 0:
         raise MinidumpError('minidump_stackwalk failed with return code %d', stackwalk.wait())

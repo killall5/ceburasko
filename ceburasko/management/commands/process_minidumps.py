@@ -29,6 +29,7 @@ class Command(BaseCommand):
                         minidump.ip_address,
                         minidump.user_id,
                     )
+                    self.stdout.write('OK, issue #%d' % issue.id)
             except Exception as e:
                 self.stderr.write('Error: %s' % str(e))
             finally:
