@@ -401,7 +401,7 @@ def upload_breakpad_symbol(request, project_id):
         os.makedirs(symbol_dir)
     except:
         pass
-    symbol_filename = os.path.join(symbol_dir, debug_filename)
+    symbol_filename = os.path.join(symbol_dir, debug_filename + '.sym')
     with open(symbol_filename, 'w') as symbol_file:
         for chunk in request.FILES['symbol_file'].chunks():
             symbol_file.write(chunk)
