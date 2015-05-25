@@ -9,9 +9,9 @@ from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from django.db.models import Count
 from django.conf import settings
+from django.db import connection
 from context_processors import set_default_order, to_order_by
 from ceburasko.utils import create_or_update_issue, UnknownSourceError
-import hashlib
 import os
 
 
@@ -93,7 +93,10 @@ def issue_list(request, project_id, is_fixed=False):
     p = get_object_or_404(Project, pk=project_id)
     context = RequestContext(request)
     order_by = to_order_by(context['order'])
-    issues = p.issue_set.filter(is_fixed=is_fixed).annotate(accidents_count=Count('accident')).order_by(order_by)
+    issues = p.issue_set.extra(select={
+       'users_affected': "select count(distinct user_id) from ceburasko_accident "
+                         "where ceburasko_accident.issue_id = ceburasko_issue.id"
+    }).filter(is_fixed=is_fixed).annotate(accidents_count=Count('accident')).order_by(order_by)
     issues_paged = get_paginator(issues, 50, request.GET.get('page'))
 
     return render_to_response(
@@ -272,6 +275,10 @@ def issue_details(request, issue_id):
     issue = get_object_or_404(Issue, pk=issue_id)
     context = RequestContext(request)
     order_by = to_order_by(context['order'])
+    cursor = connection.cursor()
+    cursor.execute('select count(distinct user_id) from ceburasko_accident '
+                   'where ceburasko_accident.issue_id = %s' % (issue_id, ))
+    users_affected = cursor.fetchone()[0]
     # FIXME: needs left join
     foreign_trackers = {}
     for tracker in ForeignTracker.objects.all():
@@ -285,7 +292,11 @@ def issue_details(request, issue_id):
     accidents = get_paginator(issue.accident_set.order_by(order_by), 25, request.GET.get('page'))
     return render_to_response(
         'ceburasko/issue_details.html',
-        {'issue': issue, 'foreign_trackers': foreign_trackers.values(), 'accidents': accidents, },
+        {'issue': issue,
+         'foreign_trackers': foreign_trackers.values(),
+         'accidents': accidents,
+         'users_affected': users_affected,
+         },
         context_instance=context,
     )
 

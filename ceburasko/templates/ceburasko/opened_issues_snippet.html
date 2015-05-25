@@ -4,6 +4,7 @@
         <th>Summary</th>
         <th>Foreign</th>
         <th>{%include "ceburasko/ordering_snippet.html" with title="Accidents" key="accidents_count"%}</th>
+        <th>{%include "ceburasko/ordering_snippet.html" with title="Users" key="users_affected"%}</th>
         <th>{%include "ceburasko/ordering_snippet.html" with title="Modified" key="modified_time"%}</th>
         <th>{%include "ceburasko/ordering_snippet.html" with title="First version" key="first_affected_version"%}</th>
         <th>{%include "ceburasko/ordering_snippet.html" with title="Last version" key="last_affected_version"%}</th>
@@ -14,6 +15,7 @@
         <td><a href="{% url 'ceburasko:issue_details' issue.id %}">{{ issue }}</a></td>
         <td>{% for fi in issue.foreignissue_set.all %}<a href="{{fi.url}}">{{fi.key}}</a> {%endfor%}</td>
         <td>{{ issue.accidents_count }}</td>
+        <td>{{ issue.users_affected }}</td>
         <td>{{ issue.modified_time|date:'Y-m-d H:i:s' }}</td>
         <td>{{ issue.first_affected_version }}</td>
         <td>{{ issue.last_affected_version }}</td>
