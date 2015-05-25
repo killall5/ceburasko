@@ -1,8 +1,9 @@
-ceburasko (4.0.1) stable; urgency=medium
+ceburasko (4.0.2) stable; urgency=medium
 
   * Fix last version updating
+  * Add affected users counter
 
- -- Alexey Tamarevskiy <mirror@inetra.ru>  Mon, 25 May 2015 15:25:00 +0600
+ -- Alexey Tamarevskiy <mirror@inetra.ru>  Mon, 25 May 2015 16:25:00 +0600
 
 ceburasko (4.0-1) stable; urgency=high
 
