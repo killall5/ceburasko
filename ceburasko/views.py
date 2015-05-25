@@ -95,8 +95,10 @@ def issue_list(request, project_id, is_fixed=False):
     order_by = to_order_by(context['order'])
     issues = p.issue_set.extra(select={
        'users_affected': "select count(distinct user_id) from ceburasko_accident "
-                         "where ceburasko_accident.issue_id = ceburasko_issue.id"
-    }).filter(is_fixed=is_fixed).annotate(accidents_count=Count('accident')).order_by(order_by)
+                         "where ceburasko_accident.issue_id = ceburasko_issue.id",
+       'accidents_count': "select count(*) from ceburasko_accident "
+                          "where ceburasko_accident.issue_id = ceburasko_issue.id",
+    }).filter(is_fixed=is_fixed).order_by(order_by)
     issues_paged = get_paginator(issues, 50, request.GET.get('page'))
 
     return render_to_response(
