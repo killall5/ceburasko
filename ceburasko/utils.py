@@ -43,6 +43,7 @@ def create_or_update_issue(affected_binary, raw_accident, ip, user_id=None):
     try:
         issue = project.issue_set.filter(hash=issue_hash, kind=raw_accident['kind'])[0]
         issue.last_affected_version = max(issue.last_affected_version, affected_build.version)
+        issue.save()
     except (ObjectDoesNotExist, IndexError) as e:
         issue = project.issue_set.create(
             hash=issue_hash,

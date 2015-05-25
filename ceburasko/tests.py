@@ -314,3 +314,30 @@ class UploadAccidentTest(TestCase):
         self.assertNotEqual(response[3]['issue'], response[5]['issue'])
 
         self.assertEqual(response[5]['issue'], response[6]['issue'])
+
+    def test_affected_version_increment(self):
+        build = Build.objects.create(project=self.project, version=Version('2.0.0.0'))
+        binary = Binary.objects.create(build=build, hash='fake:2', filename='bin/true')
+        accidents = [
+            {
+                'binary_id': 'fake:asdf',
+                'accidents': [
+                    {
+                        'kind': 'killed',
+                        'stack': [
+                            {
+                                'fn': 'main',
+                                'file': '/home/jenkins/workspace/foobar/main.cpp',
+                            },
+                        ]
+                    },
+                ]
+            },
+        ]
+        self.client.post('/crashes/upload-accidents/', yaml.dump(accidents), content_type='application/yaml')
+        accidents[0]['binary_id'] = binary.hash
+        response = self.client.post('/crashes/upload-accidents/', yaml.dump(accidents), content_type='application/yaml')
+        response = yaml.load(response.content)
+        issue_id = response[0]['issue']
+        issue = Issue.objects.get(pk=issue_id)
+        self.assertEqual(issue.last_affected_version, build.version)
