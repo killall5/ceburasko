@@ -385,3 +385,38 @@ class UploadAccidentTest(TestCase):
         issue_id = response[0]['issue']
         issue = Issue.objects.get(pk=issue_id)
         self.assertEqual(issue.last_affected_version, build.version)
+
+    def test_issue_reopen(self):
+        build = Build.objects.create(project=self.project, version=Version('2.0.0.0'))
+        binary = Binary.objects.create(build=build, hash='fake:2', filename='bin/true')
+        accidents = [
+            {
+                'binary_id': 'fake:asdf',
+                'accidents': [
+                    {
+                        'kind': 'killed',
+                        'stack': [
+                            {
+                                'fn': 'main',
+                                'file': '/home/jenkins/workspace/foobar/main.cpp',
+                            },
+                        ]
+                    },
+                ]
+            },
+        ]
+        response = self.client.post('/crashes/upload-accidents/', yaml.dump(accidents), content_type='application/yaml')
+        response = yaml.load(response.content)
+        issue = Issue.objects.get(pk=response[0]['issue'])
+        issue.fixed_version = Version('2.0.0.0')
+        issue.is_fixed = True
+        issue.save()
+        response = self.client.post('/crashes/upload-accidents/', yaml.dump(accidents), content_type='application/yaml')
+        response = yaml.load(response.content)
+        issue = Issue.objects.get(pk=response[0]['issue'])
+        self.assertEqual(issue.is_fixed, True)
+        accidents[0]['binary_id'] = binary.hash
+        response = self.client.post('/crashes/upload-accidents/', yaml.dump(accidents), content_type='application/yaml')
+        response = yaml.load(response.content)
+        issue = Issue.objects.get(pk=response[0]['issue'])
+        self.assertEqual(issue.is_fixed, False)

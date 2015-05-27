@@ -255,7 +255,7 @@ def upload_accidents(request):
                 responses.append(response)
                 continue
 
-            # import pdb; pdb.set_trace()
+            modified_issues.append(issue)
             if issue.save_logs and 'logs' in reported_accident:
                 for log in reported_accident['logs']:
                     if log in logs:
