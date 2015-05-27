@@ -202,6 +202,14 @@ def upload_accidents(request):
             response['reason'] = 'no binary_id key'
             responses.append(response)
             continue
+        logs = {}
+        if 'logs' in case:
+            for name, content in case['logs'].items():
+                logs[name] = {
+                    'name': name,
+                    'content': content,
+                    'model': None,
+                }
         try:
             affected_binary = Binary.objects.get(hash=binary_id)
             affected_build = affected_binary.build
@@ -246,6 +254,17 @@ def upload_accidents(request):
                 response['reason'] = 'unknown source'
                 responses.append(response)
                 continue
+
+            # import pdb; pdb.set_trace()
+            if issue.save_logs and 'logs' in reported_accident:
+                for log in reported_accident['logs']:
+                    if log in logs:
+                        log = logs[log]
+                        if log['model'] is None:
+                            log['model'] = ApplicationLog.objects.create(name=log['name'], content=log['content'])
+                            del log['content']
+                        accident.logs.add(log['model'])
+                accident.save()
 
             response['action'] = 'accepted'
             response['issue'] = issue.id

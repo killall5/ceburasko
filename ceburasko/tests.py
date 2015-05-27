@@ -151,6 +151,50 @@ class UploadAccidentTest(TestCase):
         self.assertEqual(issue.priority, 100)
         self.assertEqual(issue.first_affected_version, Version('1.0.0.0'))
 
+    def test_upload_logs(self):
+        accidents = [
+            {
+                'binary_id': 'fake:asdf',
+                'logs': {'stderr': 'stderr line1\nstderr line2\n', 'stdout': 'stdout line'},
+                'accidents': [
+                    {
+                        'kind': 'killed',
+                        'logs': ['stderr', 'unexistent'],
+                        'stack': [
+                            {
+                                'fn': 'main',
+                                'file': '/home/jenkins/workspace/foobar/main.cpp',
+                            },
+                        ]
+                    },
+                    {
+                        'kind': 'killed',
+                        'logs': ['unexistent', 'stderr'],
+                        'stack': [
+                            {
+                                'fn': 'assert',
+                            },
+                            {
+                                'fn': 'main',
+                                'file': '/home/jenkins/workspace/foobar/main.cpp',
+                            },
+                        ]
+                    },
+                ]
+            },
+        ]
+        self.client.post('/crashes/upload-accidents/', yaml.dump(accidents), content_type='application/yaml')
+        logs = ApplicationLog.objects.all()
+        self.assertEqual(len(logs), 0)
+        issue = Issue.objects.all()[0]
+        issue.save_logs = True
+        issue.save()
+        self.client.post('/crashes/upload-accidents/', yaml.dump(accidents), content_type='application/yaml')
+        logs = ApplicationLog.objects.all()
+        self.assertEqual(len(logs), 1)
+        self.assertEqual(logs[0].name, 'stderr')
+        self.assertEqual(logs[0].content, 'stderr line1\nstderr line2\n')
+
     def test_unknown_binary_id(self):
         accidents = [
             {
