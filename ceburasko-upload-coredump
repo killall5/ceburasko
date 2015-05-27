@@ -24,11 +24,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     should_cleanup = True
+    stdout = args.coredump.replace('.core', '.stdout')
+    stderr = args.coredump.replace('.core', '.stderr')
     try:
         accident = accident_from_coredump(args.coredump)
-        upload_accidents(accident, args.project_url)
+        upload_accidents(accident, args.project_url, [stdout, stderr], args.timeout)
     except UploadDataError as e:
         should_cleanup = False
     finally:
         if should_cleanup:
-            os.unlink(args.coredump)
+            for filename in (args.coredump, stdout, stderr):
+                try:
+                    os.unlink(filename)
+                except OSError as e:
+                    pass
