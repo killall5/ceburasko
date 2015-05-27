@@ -316,6 +316,7 @@ def issue_modify(request, issue_id):
     issue = get_object_or_404(Issue, pk=issue_id)
     issue.modified = timezone.now()
     issue.title = request.POST['title']
+    issue.save_logs = 'save_logs' in request.POST
     # issue.description = request.POST['description']
     issue.priority = request.POST['priority']
     if request.POST['fixed_version']:

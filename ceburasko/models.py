@@ -45,6 +45,7 @@ class Issue(Model):
     created_time = DateTimeField(auto_now_add=True, blank=True)
     modified_time = DateTimeField(auto_now_add=True, blank=True)
     priority = IntegerField()
+    save_logs = BooleanField(default=False)
 
     class Meta:
         ordering = ['-priority']
@@ -73,6 +74,14 @@ class Binary(Model):
         return "%s (%s)" % (self.filename, self.hash)
 
 
+class ApplicationLog(Model):
+    name = CharField(max_length=100)
+    content = TextField()
+
+    def __unicode__(self):
+        return str(self.name)
+
+
 class Accident(Model):
     issue = ForeignKey(Issue)
     build = ForeignKey(Build)
@@ -81,6 +90,7 @@ class Accident(Model):
     ip = IPAddressField()
     annotation = TextField(null=True, blank=True)
     user_id = CharField(max_length=40, null=True)
+    logs = ManyToManyField(ApplicationLog)
 
     def __unicode__(self):
         return "Accident #%d" % (self.id, )
