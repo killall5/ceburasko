@@ -7,6 +7,11 @@
 <ol class="breadcrumb">
     <li><a href="{% url 'ceburasko:projects' %}">Projects</a></li>
     <li><a href="{% url 'ceburasko:project_details' issue.project.id %}">{{ issue.project }}</a></li>
+    {% if issue.is_fixed %}
+    <li><a href="{%url 'ceburasko:fixed-issues' issue.project.id%}">Fixed issues</a></li>
+    {% else %}
+    <li><a href="{%url 'ceburasko:issues' issue.project.id%}">Opened issues</a></li>
+    {% endif %}
     <li class="active">{{issue}}</li>
 </ol>
 {% endblock breadcrumbs %}
