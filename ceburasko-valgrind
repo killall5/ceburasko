@@ -18,9 +18,9 @@ class MyInterruptionHandler(InterruptionHandler):
         self.logfile = logfile
 
     def on_signal(self, signum):
-        self.cleanup()
+        self.cleanup(signum)
 
-    def cleanup(self):
+    def cleanup(self, signum):
         if self.process.poll() is None:
             if os.name != 'nt':
                 self.process.terminate()
@@ -62,7 +62,7 @@ def main():
     process = subprocess.Popen(valgrind)
     mih = MyInterruptionHandler(process, log_filename)
     process.wait()
-    mih.cleanup()
+    mih.cleanup(signal.SIGINT)
 
 if __name__ == '__main__':
     main()
