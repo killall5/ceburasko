@@ -154,23 +154,15 @@ def upload_binaries(request, project_id):
     payload = yaml.load(request.body)
     version = Version(payload['version'])
     components = payload['components']
-    try:
-        build = p.build_set.get(version=version)
-        action = "updated"
-    except ObjectDoesNotExist as e:
-        build = Build.objects.create(project=p, version=version, created_time=timezone.now())
-        action = "created"
+    build, created = p.build_set.get_or_create(version=version)
+    action = "created" if created else "updated"
     for binary_id, components in components.items():
         if not components:
             continue
         component = components[0]
-        try:
-            binary = Binary.objects.get(hash=binary_id)
-            binary.build = build
-            binary.filename = component
-            binary.save()
-        except ObjectDoesNotExist as e:
-            Binary.objects.create(build=build, hash=binary_id, filename=components[0])
+        binary = build.binary_set.update_or_create(hash=binary_id, defaults={
+            'filename': component
+        })
     response = {
         'action': action,
         'version': str(build.version),
@@ -341,7 +333,6 @@ def issue_modify(request, issue_id):
     if request.POST['fixed_version']:
         issue.fixed_version = Version(request.POST['fixed_version'])
         issue.is_fixed = not issue.fixed_version <= issue.last_affected_version
-
     else:
         issue.fixed_version = None
         issue.is_fixed = False
@@ -349,12 +340,9 @@ def issue_modify(request, issue_id):
         if 'tracker%d' % tracker.id in request.POST:
             if request.POST['tracker%d' % tracker.id]:
                 key = request.POST['tracker%d' % tracker.id]
-                try:
-                    foreign_issue = issue.foreignissue_set.get(tracker=tracker)
-                    foreign_issue.key = key
-                    foreign_issue.save()
-                except ObjectDoesNotExist as e:
-                    ForeignIssue.objects.create(tracker=tracker, issue=issue, key=key)
+                issue.foreignissue_set.update_or_create(tracker=tracker, defaults={
+                    'key': key,
+                })
             else:
                 try:
                     foreign_issue = issue.foreignissue_set.get(tracker=tracker)
@@ -414,17 +402,13 @@ def known_kind_list(request, project_id):
 def upload_breakpad_symbol(request, project_id):
     p = get_object_or_404(Project, pk=project_id)
     version = Version(request.POST['version'])
-    try:
-        build = p.build_set.get(version=version)
-    except ObjectDoesNotExist as e:
-        build = p.build_set.create(version=version)
+    build, created = p.build_set.get_or_create(version=version)
     debug_identifier = request.POST['debug_identifier']
     debug_filename = request.POST['debug_file']
     binary_id = 'breakpad:%s' % debug_identifier
-    try:
-        build.binary_set.get(hash=binary_id)
-    except ObjectDoesNotExist as e:
-        build.binary_set.create(hash=binary_id, filename=debug_filename)
+    build.binary_set.update_or_create(hash=binary_id, defaults={
+        'filename': debug_filename,
+    })
     symbol_dir = os.path.join(
         settings.BREAKPAD_SYMBOLS_PATH,
         debug_filename,
