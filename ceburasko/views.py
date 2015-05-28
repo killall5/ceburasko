@@ -1,7 +1,7 @@
-from django.shortcuts import get_object_or_404, get_list_or_404, render_to_response
+from django.shortcuts import get_object_or_404, render_to_response
 from ceburasko.models import *
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 import yaml
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -38,10 +38,14 @@ def get_paginator(source, page_size, page):
 
 
 def project_list(request):
-    projects = Project.objects.all()
-    for p in projects:
-        p.opened_issues = p.issue_set.filter(is_fixed=False).count()
-        p.fixed_issues = p.issue_set.count() - p.opened_issues
+    projects = Project.objects.all().extra(select={
+        'opened_issues': "select count(*) from ceburasko_issue where "
+                         "ceburasko_issue.project_id = ceburasko_project.id and "
+                         "not ceburasko_issue.is_fixed",
+        'fixed_issues': "select count(*) from ceburasko_issue where "
+                         "ceburasko_issue.project_id = ceburasko_project.id and "
+                         "ceburasko_issue.is_fixed",
+    })
     return render_to_response(
         'ceburasko/project_list.html',
         {'projects': projects},
@@ -61,23 +65,15 @@ def project_details(request, project_id):
     p = get_object_or_404(Project, pk=project_id)
     context = RequestContext(request)
     order_by = to_order_by(context['order'])
-    opened_issues = p.issue_set.filter(is_fixed=False).annotate(accidents_count=Count('accident')).order_by(order_by)
-    opened_issues_count = len(opened_issues)
-    opened_issues = opened_issues[:5]
-    fixed_issues = p.issue_set.filter(is_fixed=True).annotate(accidents_count=Count('accident')).order_by(order_by)
-    fixed_issues_count = len(fixed_issues)
-    fixed_issues = fixed_issues[:5]
-    builds = p.build_set.all()[:5]
+    opened_issues = p.issue_set.filter(is_fixed=False)
+    fixed_issues = p.issue_set.filter(is_fixed=True)
 
     return render_to_response(
         'ceburasko/project_details.html',
         {
             'project': p,
             'opened_issues': opened_issues,
-            'opened_issues_count': opened_issues_count,
             'fixed_issues': fixed_issues,
-            'fixed_issues_count': fixed_issues_count,
-            'builds': builds,
         },
         context_instance=context,
     )
@@ -285,13 +281,15 @@ def upload_accidents(request):
 
 def issue_details(request, issue_id):
     set_default_order('-datetime')
-    issue = get_object_or_404(Issue, pk=issue_id)
+    try:
+        issue = Issue.objects.select_related('project').extra(select={
+            "users_affected": "select count(distinct user_id) from ceburasko_accident "
+                              "where ceburasko_accident.issue_id = ceburasko_issue.id"
+        }).get(pk=issue_id)
+    except:
+        raise Http404("No such issue")
     context = RequestContext(request)
     order_by = to_order_by(context['order'])
-    cursor = connection.cursor()
-    cursor.execute('select count(distinct user_id) from ceburasko_accident '
-                   'where ceburasko_accident.issue_id = %s' % (issue_id, ))
-    users_affected = cursor.fetchone()[0]
     # FIXME: needs left join
     foreign_trackers = {}
     for tracker in ForeignTracker.objects.all():
@@ -302,13 +300,16 @@ def issue_details(request, issue_id):
         foreign_tracker.issue_status = foreign_issue.status
         foreign_tracker.issue_url = foreign_issue.url
 
-    accidents = get_paginator(issue.accident_set.order_by(order_by), 25, request.GET.get('page'))
+    accidents = issue.accident_set.select_related('build', 'binary').extra(select={
+        'logs_available': 'select count(*) from ceburasko_accident_logs where '
+                          'ceburasko_accident_logs.accident_id = ceburasko_accident.id'
+    }).order_by(order_by)
+    accidents = get_paginator(accidents, 25, request.GET.get('page'))
     return render_to_response(
         'ceburasko/issue_details.html',
         {'issue': issue,
          'foreign_trackers': foreign_trackers.values(),
          'accidents': accidents,
-         'users_affected': users_affected,
          },
         context_instance=context,
     )
@@ -316,9 +317,13 @@ def issue_details(request, issue_id):
 
 def accident_details(request, accident_id):
     accident = get_object_or_404(Accident, pk=accident_id)
+    logs = accident.logs.defer('content').all()
     return render_to_response(
         'ceburasko/accident_details.html',
-        {'accident': accident},
+        {
+            'accident': accident,
+            'logs': logs,
+        },
         context_instance=RequestContext(request)
     )
 
@@ -446,3 +451,9 @@ def upload_minidump(request):
             for chunk in minidump.chunks():
                 f.write(chunk)
     return HttpResponse(status=200)
+
+def application_log(request, application_log_id):
+    log = get_object_or_404(ApplicationLog, pk=application_log_id)
+    response = HttpResponse(content=log.content, content_type='application/octet-stream')
+    response['Content-Disposition'] = 'attachment; filename="%s"' % (os.path.basename(log.name), )
+    return response
