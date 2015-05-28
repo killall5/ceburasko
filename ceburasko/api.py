@@ -62,7 +62,7 @@ def upload_accidents(accidents, project_url, log_filenames=[], timeout=10):
         for filename in log_filenames:
             try:
                 with open(filename) as log:
-                    binary_accidents['logs'][filename] = log.readall()
+                    binary_accidents['logs'][filename] = log.read()
             except:
                 pass
         payload.append(binary_accidents)
