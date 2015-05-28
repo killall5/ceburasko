@@ -2,10 +2,9 @@
 
 <p>
     <ul>
-        <!--li>Builds ({{project.build_set.count}} total)</li-->
         <li><a href="{%url 'ceburasko:kinds' project.id%}">Issue kinds</a> ({{project.kindpriority_set.count}} known, {{project.unknownkind_set.count}} unknown)</li>
         <li><a href="{%url 'ceburasko:sources' project.id%}">Sources</a> ({{project.sourcepath_set.count}} known)</li>
-        <li><a href="{%url 'ceburasko:issues' project.id%}">Opened issues</a></li>
-        <li><a href="{%url 'ceburasko:fixed-issues' project.id%}">Fixed issues</a></li>
+        <li><a href="{%url 'ceburasko:issues' project.id%}">Opened issues</a> ({{opened_issues.count}} total)</li>
+        <li><a href="{%url 'ceburasko:fixed-issues' project.id%}">Fixed issues</a> ({{fixed_issues.count}} total)</li>
     </ul>
 </p>

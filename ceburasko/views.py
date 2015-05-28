@@ -1,7 +1,7 @@
-from django.shortcuts import get_object_or_404, get_list_or_404, render_to_response
+from django.shortcuts import get_object_or_404, render_to_response
 from ceburasko.models import *
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 import yaml
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -38,10 +38,14 @@ def get_paginator(source, page_size, page):
 
 
 def project_list(request):
-    projects = Project.objects.all()
-    for p in projects:
-        p.opened_issues = p.issue_set.filter(is_fixed=False).count()
-        p.fixed_issues = p.issue_set.count() - p.opened_issues
+    projects = Project.objects.all().extra(select={
+        'opened_issues': "select count(*) from ceburasko_issue where "
+                         "ceburasko_issue.project_id = ceburasko_project.id and "
+                         "not ceburasko_issue.is_fixed",
+        'fixed_issues': "select count(*) from ceburasko_issue where "
+                         "ceburasko_issue.project_id = ceburasko_project.id and "
+                         "ceburasko_issue.is_fixed",
+    })
     return render_to_response(
         'ceburasko/project_list.html',
         {'projects': projects},
@@ -61,23 +65,15 @@ def project_details(request, project_id):
     p = get_object_or_404(Project, pk=project_id)
     context = RequestContext(request)
     order_by = to_order_by(context['order'])
-    opened_issues = p.issue_set.filter(is_fixed=False).annotate(accidents_count=Count('accident')).order_by(order_by)
-    opened_issues_count = len(opened_issues)
-    opened_issues = opened_issues[:5]
-    fixed_issues = p.issue_set.filter(is_fixed=True).annotate(accidents_count=Count('accident')).order_by(order_by)
-    fixed_issues_count = len(fixed_issues)
-    fixed_issues = fixed_issues[:5]
-    builds = p.build_set.all()[:5]
+    opened_issues = p.issue_set.filter(is_fixed=False)
+    fixed_issues = p.issue_set.filter(is_fixed=True)
 
     return render_to_response(
         'ceburasko/project_details.html',
         {
             'project': p,
             'opened_issues': opened_issues,
-            'opened_issues_count': opened_issues_count,
             'fixed_issues': fixed_issues,
-            'fixed_issues_count': fixed_issues_count,
-            'builds': builds,
         },
         context_instance=context,
     )
@@ -154,23 +150,15 @@ def upload_binaries(request, project_id):
     payload = yaml.load(request.body)
     version = Version(payload['version'])
     components = payload['components']
-    try:
-        build = p.build_set.get(version=version)
-        action = "updated"
-    except ObjectDoesNotExist as e:
-        build = Build.objects.create(project=p, version=version, created_time=timezone.now())
-        action = "created"
+    build, created = p.build_set.get_or_create(version=version)
+    action = "created" if created else "updated"
     for binary_id, components in components.items():
         if not components:
             continue
         component = components[0]
-        try:
-            binary = Binary.objects.get(hash=binary_id)
-            binary.build = build
-            binary.filename = component
-            binary.save()
-        except ObjectDoesNotExist as e:
-            Binary.objects.create(build=build, hash=binary_id, filename=components[0])
+        binary = build.binary_set.update_or_create(hash=binary_id, defaults={
+            'filename': component
+        })
     response = {
         'action': action,
         'version': str(build.version),
@@ -202,6 +190,14 @@ def upload_accidents(request):
             response['reason'] = 'no binary_id key'
             responses.append(response)
             continue
+        logs = {}
+        if 'logs' in case:
+            for name, content in case['logs'].items():
+                logs[name] = {
+                    'name': name,
+                    'content': content,
+                    'model': None,
+                }
         try:
             affected_binary = Binary.objects.get(hash=binary_id)
             affected_build = affected_binary.build
@@ -247,6 +243,17 @@ def upload_accidents(request):
                 responses.append(response)
                 continue
 
+            modified_issues.append(issue)
+            if issue.save_logs and 'logs' in reported_accident:
+                for log in reported_accident['logs']:
+                    if log in logs:
+                        log = logs[log]
+                        if log['model'] is None:
+                            log['model'] = ApplicationLog.objects.create(name=log['name'], content=log['content'])
+                            del log['content']
+                        accident.logs.add(log['model'])
+                accident.save()
+
             response['action'] = 'accepted'
             response['issue'] = issue.id
             response['project'] = issue.project.id
@@ -274,13 +281,15 @@ def upload_accidents(request):
 
 def issue_details(request, issue_id):
     set_default_order('-datetime')
-    issue = get_object_or_404(Issue, pk=issue_id)
+    try:
+        issue = Issue.objects.select_related('project').extra(select={
+            "users_affected": "select count(distinct user_id) from ceburasko_accident "
+                              "where ceburasko_accident.issue_id = ceburasko_issue.id"
+        }).get(pk=issue_id)
+    except:
+        raise Http404("No such issue")
     context = RequestContext(request)
     order_by = to_order_by(context['order'])
-    cursor = connection.cursor()
-    cursor.execute('select count(distinct user_id) from ceburasko_accident '
-                   'where ceburasko_accident.issue_id = %s' % (issue_id, ))
-    users_affected = cursor.fetchone()[0]
     # FIXME: needs left join
     foreign_trackers = {}
     for tracker in ForeignTracker.objects.all():
@@ -291,13 +300,16 @@ def issue_details(request, issue_id):
         foreign_tracker.issue_status = foreign_issue.status
         foreign_tracker.issue_url = foreign_issue.url
 
-    accidents = get_paginator(issue.accident_set.order_by(order_by), 25, request.GET.get('page'))
+    accidents = issue.accident_set.select_related('build', 'binary').extra(select={
+        'logs_available': 'select count(*) from ceburasko_accident_logs where '
+                          'ceburasko_accident_logs.accident_id = ceburasko_accident.id'
+    }).order_by(order_by)
+    accidents = get_paginator(accidents, 25, request.GET.get('page'))
     return render_to_response(
         'ceburasko/issue_details.html',
         {'issue': issue,
          'foreign_trackers': foreign_trackers.values(),
          'accidents': accidents,
-         'users_affected': users_affected,
          },
         context_instance=context,
     )
@@ -305,9 +317,13 @@ def issue_details(request, issue_id):
 
 def accident_details(request, accident_id):
     accident = get_object_or_404(Accident, pk=accident_id)
+    logs = accident.logs.defer('content').all()
     return render_to_response(
         'ceburasko/accident_details.html',
-        {'accident': accident},
+        {
+            'accident': accident,
+            'logs': logs,
+        },
         context_instance=RequestContext(request)
     )
 
@@ -316,12 +332,12 @@ def issue_modify(request, issue_id):
     issue = get_object_or_404(Issue, pk=issue_id)
     issue.modified = timezone.now()
     issue.title = request.POST['title']
+    issue.save_logs = 'save_logs' in request.POST
     # issue.description = request.POST['description']
     issue.priority = request.POST['priority']
     if request.POST['fixed_version']:
         issue.fixed_version = Version(request.POST['fixed_version'])
         issue.is_fixed = not issue.fixed_version <= issue.last_affected_version
-
     else:
         issue.fixed_version = None
         issue.is_fixed = False
@@ -329,12 +345,9 @@ def issue_modify(request, issue_id):
         if 'tracker%d' % tracker.id in request.POST:
             if request.POST['tracker%d' % tracker.id]:
                 key = request.POST['tracker%d' % tracker.id]
-                try:
-                    foreign_issue = issue.foreignissue_set.get(tracker=tracker)
-                    foreign_issue.key = key
-                    foreign_issue.save()
-                except ObjectDoesNotExist as e:
-                    ForeignIssue.objects.create(tracker=tracker, issue=issue, key=key)
+                issue.foreignissue_set.update_or_create(tracker=tracker, defaults={
+                    'key': key,
+                })
             else:
                 try:
                     foreign_issue = issue.foreignissue_set.get(tracker=tracker)
@@ -394,17 +407,13 @@ def known_kind_list(request, project_id):
 def upload_breakpad_symbol(request, project_id):
     p = get_object_or_404(Project, pk=project_id)
     version = Version(request.POST['version'])
-    try:
-        build = p.build_set.get(version=version)
-    except ObjectDoesNotExist as e:
-        build = p.build_set.create(version=version)
+    build, created = p.build_set.get_or_create(version=version)
     debug_identifier = request.POST['debug_identifier']
     debug_filename = request.POST['debug_file']
     binary_id = 'breakpad:%s' % debug_identifier
-    try:
-        build.binary_set.get(hash=binary_id)
-    except ObjectDoesNotExist as e:
-        build.binary_set.create(hash=binary_id, filename=debug_filename)
+    build.binary_set.update_or_create(hash=binary_id, defaults={
+        'filename': debug_filename,
+    })
     symbol_dir = os.path.join(
         settings.BREAKPAD_SYMBOLS_PATH,
         debug_filename,
@@ -442,3 +451,9 @@ def upload_minidump(request):
             for chunk in minidump.chunks():
                 f.write(chunk)
     return HttpResponse(status=200)
+
+def application_log(request, application_log_id):
+    log = get_object_or_404(ApplicationLog, pk=application_log_id)
+    response = HttpResponse(content=log.content, content_type='application/octet-stream')
+    response['Content-Disposition'] = 'attachment; filename="%s"' % (os.path.basename(log.name), )
+    return response

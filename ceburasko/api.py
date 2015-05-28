@@ -28,7 +28,7 @@ def upload_binary_info(version, ids, project_url, timeout=10):
     return upload_data(url, binary_info, timeout)
 
 
-def upload_accidents(accidents, project_url, timeout=10):
+def upload_accidents(accidents, project_url, log_filenames=[], timeout=10):
     if project_url[-1] != '/':
         project_url += '/'
     binaries = {}
@@ -47,15 +47,24 @@ def upload_accidents(accidents, project_url, timeout=10):
         if accident['kind'] not in known_kinds:
             # skip unknown kinds
             continue
+        accident['logs'] = log_filenames
         if binary_id not in binaries:
             binaries[binary_id] = [accident]
         else:
             binaries[binary_id].append(accident)
     payload = []
     for binary_id, accidents in binaries.items():
-        payload.append({
+        binary_accidents = {
             'binary_id': binary_id,
             'accidents': accidents,
-        })
+            'logs': {},
+        }
+        for filename in log_filenames:
+            try:
+                with open(filename) as log:
+                    binary_accidents['logs'][filename] = log.readall()
+            except:
+                pass
+        payload.append(binary_accidents)
     url = urljoin(project_url, '../upload-accidents/')
     return upload_data(url, payload, timeout)

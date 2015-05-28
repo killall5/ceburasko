@@ -20,6 +20,7 @@ urlpatterns = patterns('ceburasko.views',
     url(r'^issue-(?P<issue_id>\d+)/delete/$', 'issue_delete', name='issue_delete'),
 
     url(r'^accident-(?P<accident_id>\d+)/$', 'accident_details', name='accident_details'),
+    url(r'^application-log-(?P<application_log_id>\d+)/$', 'application_log', name='application_log'),
 
     url(r'^project-(?P<project_id>\d+)/sources/$', 'source_list', name='sources'),
     url(r'^project-(?P<project_id>\d+)/source-add/$', 'source_add', name='source_add'),

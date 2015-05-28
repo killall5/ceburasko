@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
-import sys
 import subprocess
 import os
-import hashlib
+import shutil
 import tempfile
 import signal
 from argparse import ArgumentParser
@@ -12,10 +11,12 @@ from ceburasko.interruption_handler import InterruptionHandler
 
 
 class MyInterruptionHandler(InterruptionHandler):
-    def __init__(self, process, logfile, signum=signal.SIGINT):
+    def __init__(self, process, logfile, stdout, stderr, signum=signal.SIGINT):
         super(MyInterruptionHandler, self).__init__(signum)
         self.process = process
         self.logfile = logfile
+        self.stdout = stdout
+        self.stderr = stderr
 
     def on_signal(self, signum):
         self.cleanup(signum)
@@ -30,6 +31,20 @@ class MyInterruptionHandler(InterruptionHandler):
             self.process.wait()
         except:
             pass
+        self.stdout.close()
+        self.stderr.close()
+        vgcore_filename = 'vgcore.%d' % (self.process.pid, )
+        if os.path.isfile(vgcore_filename):
+            try:
+                os.link(self.stdout.name, vgcore_filename + '.stdout')
+                os.link(self.stderr.name, vgcore_filename + '.stderr')
+            except OSError as e:
+                try:
+                    shutil.copy2(self.stdout.name, vgcore_filename + '.stdout')
+                    shutil.copy2(self.stderr.name, vgcore_filename + '.stderr')
+                except:
+                    pass
+            os.rename(vgcore_filename, vgcore_filename + '.core')
         os.rename(self.logfile, self.logfile.replace('.log.part', '.log.xml'))
 
 
@@ -54,13 +69,15 @@ def main():
 
     binary_comment = binary_id(args.program)
     log_filename = tempfile.mkstemp(prefix='valgrind.', suffix='.log.part', dir=args.valgrind_dir)[1]
+    stdout = open(log_filename.replace('.log.part', '.stdout'), 'w')
+    stderr = open(log_filename.replace('.log.part', '.stderr'), 'w')
 
     valgrind = ['/usr/bin/valgrind']
     valgrind += ['--xml=yes', '--xml-file=%s' % log_filename]
     valgrind += ['--xml-user-comment=%s' % binary_comment]
     valgrind += [args.program] + args.args
-    process = subprocess.Popen(valgrind)
-    mih = MyInterruptionHandler(process, log_filename)
+    process = subprocess.Popen(valgrind, stdout=stdout, stderr=stderr)
+    mih = MyInterruptionHandler(process, log_filename, stdout, stderr)
     process.wait()
     mih.cleanup(signal.SIGINT)
 

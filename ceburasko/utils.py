@@ -40,19 +40,15 @@ def create_or_update_issue(affected_binary, raw_accident, ip, user_id=None):
     significant_frame, issue_hash = get_significant_frame(raw_accident['stack'], project.sourcepath_set.all())
     if not significant_frame:
         raise UnknownSourceError()
-    try:
-        issue = project.issue_set.filter(hash=issue_hash, kind=raw_accident['kind'])[0]
+    issue, created = project.issue_set.get_or_create(hash=issue_hash, kind=raw_accident['kind'], defaults={
+        'title': "%s in %s" % (raw_accident['kind'], significant_frame['fn']),
+        'priority': priority,
+        'first_affected_version': affected_build.version,
+        'last_affected_version': affected_build.version,
+    })
+    if not created:
         issue.last_affected_version = max(issue.last_affected_version, affected_build.version)
         issue.save()
-    except (ObjectDoesNotExist, IndexError) as e:
-        issue = project.issue_set.create(
-            hash=issue_hash,
-            kind=raw_accident['kind'],
-            title="%s in %s" % (raw_accident['kind'], significant_frame['fn']),
-            priority=priority,
-            first_affected_version=affected_build.version,
-            last_affected_version=affected_build.version,
-        )
     accident = Accident(
         issue=issue,
         build=affected_build,
@@ -64,7 +60,7 @@ def create_or_update_issue(affected_binary, raw_accident, ip, user_id=None):
         accident.annotation = raw_accident['annotation']
     accident.save()
 
-    for i, frame in enumerate(raw_accident['stack']):
-        Frame.objects.create(accident=accident, pos=i, **frame)
+    frames = [Frame(accident=accident, pos=i, **frame) for i, frame in enumerate(raw_accident['stack'])]
+    Frame.objects.bulk_create(frames)
 
     return issue, accident

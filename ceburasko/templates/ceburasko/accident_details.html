@@ -7,6 +7,11 @@
 <ol class="breadcrumb">
     <li><a href="{% url 'ceburasko:projects' %}">Projects</a></li>
     <li><a href="{% url 'ceburasko:project_details' accident.issue.project.id %}">{{ accident.issue.project }}</a></li>
+    {% if accident.issue.is_fixed %}
+    <li><a href="{%url 'ceburasko:fixed-issues' accident.issue.project.id%}">Fixed issues</a></li>
+    {% else %}
+    <li><a href="{%url 'ceburasko:issues' accident.issue.project.id%}">Opened issues</a></li>
+    {% endif %}
     <li><a href="{% url 'ceburasko:issue_details' accident.issue.id %}">{{ accident.issue }}</a></li>
     <li class="active">{{ accident }}</li>
 </ol>
@@ -34,6 +39,21 @@
     <div class="col-md-2 text-muted">IP:</div>
     <div class="col-md-4">{{accident.ip}}</div>
 </div>
+
+<div class="row">
+    <div class="col-md-2 text-muted">User ID:</div>
+    <div class="col-md-4">{{accident.user_id}}</div>
+
+</div>
+
+{% if logs.count %}
+<h2>Logs</h2>
+<ul>
+    {% for log in logs.all %}
+    <li><a href="{%url 'ceburasko:application_log' log.id %}">{{ log.name }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
 
 <h2>Stack trace</h2>
 

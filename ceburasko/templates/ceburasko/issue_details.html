@@ -45,7 +45,7 @@
     <div class="form-group">
         <label class="col-md-3 col-xs-3 control-label">Users affected</label>
         <div class="col-md-3 col-xs-5">
-            <p class="form-control-static">{{ users_affected }}</p>
+            <p class="form-control-static">{{ issue.users_affected }}</p>
         </div>
     </div>
     <div class="form-group">
@@ -90,6 +90,15 @@
     </div>
     {% endfor %}
     <div class="form-group">
+        <div class="col-md-offset-3 col-xs-offset-3 col-md-3 col-xs-5">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" id="save_logs" name="save_logs" {%if issue.save_logs%}checked{%endif%}/> Request logs
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
         <div class="col-md-offset-3 col-xs-offset-3 col-md-1 col-xs-1">
             <button type="submit" class="btn btn-default">Save</button>
         </div>
@@ -105,6 +114,7 @@
     <tr>
         <th>#</th>
         <th>{%include "ceburasko/ordering_snippet.html" with title="Date" key="datetime"%}</th>
+        <th>Logs</th>
         <th>IP address</th>
         <th>{%include "ceburasko/ordering_snippet.html" with title="Build" key="build"%}</th>
         <th>Binary</th>
@@ -113,6 +123,7 @@
     <tr>
         <td><a href="{%url 'ceburasko:accident_details' accident.id %}">#{{ accident.id }}</a></td>
         <td><a href="{%url 'ceburasko:accident_details' accident.id %}">{{ accident.datetime|date:"Y-m-d H:i:s" }}</a></td>
+        <td>{{ accident.logs_available }}</td>
         <td>{{ accident.ip }}</td>
         <td>{{ accident.build }}</td>
         <td>{{ accident.binary }}</td>
