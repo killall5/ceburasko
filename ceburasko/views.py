@@ -234,8 +234,7 @@ def upload_accidents(request):
                 issue, accident = create_or_update_issue(
                     affected_binary,
                     reported_accident,
-                    request.META.get('REMOTE_ADDR'),
-                    priority_by_accident_kind
+                    request.META.get('REMOTE_ADDR')
                 )
             except UnknownSourceError as e:
                 response['action'] = 'ignored'
