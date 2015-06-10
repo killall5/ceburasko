@@ -14,12 +14,19 @@ def files(basedir, dirs):
 
 setup(
     name='ceburasko',
-    version='4.1.2',
+    version='4.1.4',
     description='Ceburasko Django app',
     long_description='Django application for store crashes',
     author='Alexey Tamarevskiy',
     author_email='mirror@inetra.ru',
-    packages=['ceburasko', 'ceburasko.context_processors', 'ceburasko.migrations', 'ceburasko.templatetags', ],
+    packages=[
+        'ceburasko',
+        'ceburasko.context_processors',
+        'ceburasko.migrations',
+        'ceburasko.templatetags',
+        'ceburasko.management',
+        'ceburasko.management.commands',
+    ],
     package_data={
         'ceburasko': list(files('ceburasko', ('static', 'templates', 'data', ))),
     },
