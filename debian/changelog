@@ -1,3 +1,9 @@
+ceburasko (4.1.4-2) stable; urgency=high
+
+  * Disable coredumps for coredump uploader itself
+
+ -- Alexey Tamarevskiy <mirror@inetra.ru>  Mon, 15 Jun 2015 23:23:14 +0600
+
 ceburasko (4.1.4-1) stable; urgency=high
 
   * Add log attachment support (Closes: BYTEFOG-715)
