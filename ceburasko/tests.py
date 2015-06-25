@@ -113,6 +113,7 @@ class MinidumpParseTest(TestCase):
         self.assertEqual(error['stack'][1]['file'], '/home/mirror/test.cpp')
         self.assertEqual(error['stack'][1]['line'], '28')
 
+
 class UploadAccidentTest(TestCase):
     def setUp(self):
         self.basedir = os.path.dirname(gdb.__file__)
@@ -420,3 +421,25 @@ class UploadAccidentTest(TestCase):
         response = yaml.load(response.content)
         issue = Issue.objects.get(pk=response[0]['issue'])
         self.assertEqual(issue.is_fixed, False)
+
+
+class ViewTest(TestCase):
+    def setUp(self):
+        self.project = Project.objects.create(name='FooBar')
+        self.client = Client()
+
+    def test_issue_modify(self):
+        issue = self.project.issue_set.create(
+            first_affected_version=Version('1.0.0.0'),
+            last_affected_version=Version('2.0.0.0'),
+            priority=0,
+            is_fixed=False,
+        )
+        response = self.client.post('/crashes/issue-1/modify/', {'fixed_version': '2.0.0.0'})
+        self.assertEqual(response.status_code, 302)
+        issue = Issue.objects.get(pk=issue.id)
+        self.assertEqual(issue.is_fixed, False)
+        response = self.client.post('/crashes/issue-1/modify/', {'fixed_version': '3.0.0.0'})
+        self.assertEqual(response.status_code, 302)
+        issue = Issue.objects.get(pk=issue.id)
+        self.assertEqual(issue.is_fixed, True)

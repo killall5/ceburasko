@@ -324,15 +324,19 @@ def accident_details(request, accident_id):
 
 def issue_modify(request, issue_id):
     issue = get_object_or_404(Issue, pk=issue_id)
-    issue.title = request.POST['title']
+    if 'title' in request.POST:
+        issue.title = request.POST['title']
     issue.save_logs = 'save_logs' in request.POST
     # issue.description = request.POST['description']
-    issue.priority = request.POST['priority']
-    if request.POST['fixed_version']:
-        issue.fixed_version = Version(request.POST['fixed_version'])
-    else:
-        issue.fixed_version = None
-        issue.is_fixed = False
+    if 'priority' in request.POST:
+        issue.priority = request.POST['priority']
+    if 'fixed_version' in request.POST:
+        if request.POST['fixed_version']:
+            issue.fixed_version = Version(request.POST['fixed_version'])
+            issue.is_fixed = not issue.fixed_version <= issue.last_affected_version
+        else:
+            issue.fixed_version = None
+            issue.is_fixed = False
     for tracker in ForeignTracker.objects.all():
         if 'tracker%d' % tracker.id in request.POST:
             if request.POST['tracker%d' % tracker.id]:
