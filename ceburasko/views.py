@@ -2,16 +2,11 @@ from django.shortcuts import get_object_or_404, render_to_response
 from ceburasko.models import *
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-import yaml
-from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
-from django.db.models import Count
-from django.conf import settings
-from django.db import connection
 from context_processors import set_default_order, to_order_by
-from ceburasko.utils import create_or_update_issue, UnknownSourceError
+from ceburasko.utils import *
 import os
 
 
@@ -177,7 +172,7 @@ def upload_accidents(request):
     payload = yaml.load(request.body)
     if not isinstance(payload, list):
         payload = [payload]
-    modified_issues = []
+    modified_issues = {}
     responses = []
     unknown_kinds = {}
     for case in payload:
@@ -242,7 +237,14 @@ def upload_accidents(request):
                 responses.append(response)
                 continue
 
-            modified_issues.append(issue)
+            if accident is None:
+                response['action'] = 'ignored'
+                response['issue'] = issue.id
+                response['reason'] = 'already fixed in %s' % (issue.fixed_version, )
+                responses.append(response)
+                continue
+
+            modified_issues[issue.id] = issue
             if issue.save_logs and 'logs' in reported_accident:
                 for log in reported_accident['logs']:
                     if log in logs:
@@ -267,14 +269,7 @@ def upload_accidents(request):
             project.unknownkind_set.create(kind=kind, accidents_count=count)
 
     # update all modified issues
-    modified_time = timezone.now()
-    for issue in modified_issues:
-        issue.modified_time = modified_time
-        # Reopen reproduced issues
-        if issue.is_fixed:
-            if issue.fixed_version <= issue.last_affected_version:
-                issue.is_fixed = False
-        issue.save()
+    update_modified_issues(modified_issues.values())
     return HttpResponse(yaml.dump(responses))
 
 
@@ -329,14 +324,12 @@ def accident_details(request, accident_id):
 
 def issue_modify(request, issue_id):
     issue = get_object_or_404(Issue, pk=issue_id)
-    issue.modified = timezone.now()
     issue.title = request.POST['title']
     issue.save_logs = 'save_logs' in request.POST
     # issue.description = request.POST['description']
     issue.priority = request.POST['priority']
     if request.POST['fixed_version']:
         issue.fixed_version = Version(request.POST['fixed_version'])
-        issue.is_fixed = not issue.fixed_version <= issue.last_affected_version
     else:
         issue.fixed_version = None
         issue.is_fixed = False
@@ -353,8 +346,7 @@ def issue_modify(request, issue_id):
                     foreign_issue.delete()
                 except ObjectDoesNotExist as e:
                     pass
-    issue.modified = timezone.now()
-    issue.save()
+    update_modified_issues([issue])
     return HttpResponseRedirect(reverse('ceburasko:issue_details', args=(issue.id, )))
 
 

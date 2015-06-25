@@ -1,5 +1,6 @@
 import hashlib
 from ceburasko.models import *
+from django.utils import timezone
 
 
 class UnknownSourceError(RuntimeError):
@@ -49,18 +50,30 @@ def create_or_update_issue(affected_binary, raw_accident, ip, user_id=None):
     if not created:
         issue.last_affected_version = max(issue.last_affected_version, affected_build.version)
         issue.save()
-    accident = Accident(
-        issue=issue,
-        build=affected_build,
-        binary=affected_binary,
-        ip=ip,
-        user_id=user_id,
-    )
-    if 'annotation' in raw_accident:
-        accident.annotation = raw_accident['annotation']
-    accident.save()
-
-    frames = [Frame(accident=accident, pos=i, **frame) for i, frame in enumerate(raw_accident['stack'])]
-    Frame.objects.bulk_create(frames)
-
+    if issue.is_fixed and affected_build.version < issue.fixed_version:
+        accident = None
+    else:
+        accident = Accident(
+            issue=issue,
+            build=affected_build,
+            binary=affected_binary,
+            ip=ip,
+            user_id=user_id,
+        )
+        if 'annotation' in raw_accident:
+            accident.annotation = raw_accident['annotation']
+        accident.save()
+        frames = [Frame(accident=accident, pos=i, **frame) for i, frame in enumerate(raw_accident['stack'])]
+        Frame.objects.bulk_create(frames)
     return issue, accident
+
+
+def update_modified_issues(modified_issues):
+    modified_time = timezone.now()
+    for issue in modified_issues:
+        issue.modified_time = modified_time
+        # Reopen reproduced issues
+        if issue.is_fixed:
+            if issue.fixed_version <= issue.last_affected_version:
+                issue.is_fixed = False
+        issue.save()

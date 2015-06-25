@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from optparse import make_option
 from ceburasko.stackwalk import accident_from_minidump
-from django.conf import settings
 from ceburasko.utils import *
 import os
 
@@ -17,6 +16,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         limit = options['limit']
         self.stdout.write('Import minidumps (%d max) ...' % limit)
+        modified_issues = {}
         for minidump in Minidump.objects.all()[:limit]:
             self.stdout.write('Processing %s ...' % minidump.filepath)
             try:
@@ -29,6 +29,8 @@ class Command(BaseCommand):
                         minidump.ip_address,
                         minidump.user_id,
                     )
+                    if accident is not None:
+                        modified_issues[issue.id] = issue
                     self.stdout.write('OK, issue #%d' % issue.id)
             except Exception as e:
                 self.stderr.write('Error: %s' % str(e))
@@ -38,3 +40,4 @@ class Command(BaseCommand):
                 except OSError as e:
                     self.stderr.write('Error removing %s: %s' % (minidump.filepath, str(e)))
                 minidump.delete()
+        update_modified_issues(modified_issues.values())
