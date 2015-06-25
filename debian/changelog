@@ -1,3 +1,9 @@
+ceburasko (4.1.5-1) stable; urgency=medium
+
+  * Do not save accidents for known fixed bugs (Closes: BYTEFOG-777)
+
+ -- Alexey Tamarevskiy <mirror@inetra.ru>  Thu, 25 Jun 2015 14:51:00 +0600
+
 ceburasko (4.1.4-2) stable; urgency=high
 
   * Disable coredumps for coredump uploader itself
