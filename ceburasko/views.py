@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
+from django.conf import settings
 from context_processors import set_default_order, to_order_by
 from ceburasko.utils import *
 import os
@@ -446,6 +447,7 @@ def upload_minidump(request):
             for chunk in minidump.chunks():
                 f.write(chunk)
     return HttpResponse(status=200)
+
 
 def application_log(request, application_log_id):
     log = get_object_or_404(ApplicationLog, pk=application_log_id)
