@@ -1,3 +1,9 @@
+ceburasko (4.1.7-1) stable; urgency=high
+
+  * Fix importing django settings
+
+ -- Alexey Tamarevskiy <mirror@inetra.ru>  Fri, 03 Jul 2015 13:12:27 +0600
+
 ceburasko (4.1.6-1) stable; urgency=high
 
   * Fix issue editing
