@@ -1,3 +1,9 @@
+ceburasko (4.1.8-1) stable; urgency=medium
+
+  * Add crashed type and address from minidump
+
+ -- Alexey Tamarevskiy <mirror@inetra.ru>  Tue, 07 Jul 2015 12:48:13 +0600
+
 ceburasko (4.1.7-1) stable; urgency=high
 
   * Fix importing django settings
