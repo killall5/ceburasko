@@ -70,9 +70,12 @@ def accident_from_coredump(coredump):
     binary = find_by_binary_id(binary_id, cache='/var/cache/ceburasko/binary_id_cache.db')
     if not binary:
         return
+    symbols = find_by_binary_id(binary_id, paths=['/usr/lib/debug'], cache='/var/cache/ceburasko/binary_id_symbols.db')
+    if not symbols:
+        return
 
     # TODO: get stack for all threads (bug in wheezy gdb?)
-    gdb = Popen(["gdb", "--batch", "--quiet", "-ex", "bt full", "-ex", "quit", binary, coredump], stdout=PIPE)
+    gdb = Popen(["gdb", "--batch", "--quiet", "-ex", "bt full", "-ex", "quit", "--core", coredump, "--exec", binary, "--symbols", symbols], stdout=PIPE)
     annotation, _ = gdb.communicate()
 
     for accident in parse_gdb(annotation.split('\n')):

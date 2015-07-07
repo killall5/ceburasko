@@ -27,7 +27,14 @@ def binary_id_from_coredump(coredump):
 
 
 def binary_id_from_elf_headers(filename):
-    return binary_id_from_coredump(filename)
+    eu_readelf = Popen(["eu-readelf", "-n", filename], stdout=PIPE, stderr=PIPE)
+    if eu_readelf.wait() != 0:
+        raise ReadElfFailed(eu_readelf.stderr.read().strip())
+    for line in eu_readelf.stdout.readlines():
+        if 'Build ID' in line:
+            build_id = line.split()[-1]
+            return "%s:%s" % ("build-id", build_id)
+    raise NoBuildId("No build-id found")
 
 
 def binary_id_from_content(filename, hash_name="sha256"):
@@ -56,7 +63,7 @@ def is_exe(path):
 import sqlite3
 
 
-def find_by_binary_id(needle_id, paths = [], cache = 'binary_id_cache.db'):
+def find_by_binary_id(needle_id, paths=[], cache='binary_id_cache.db'):
     if cache:
         conn = sqlite3.connect(cache)
         cur = conn.cursor()
