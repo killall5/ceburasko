@@ -1,6 +1,7 @@
-ceburasko (4.1.9-1) stable; urgency=high
+ceburasko (4.1.10-1) stable; urgency=high
 
   * Add crashed type and address from minidump
+  * Calc binary-id for non-executables
   * Pass symbols to gdb
 
  -- Alexey Tamarevskiy <mirror@inetra.ru>  Tue, 07 Jul 2015 13:20:00 +0600
