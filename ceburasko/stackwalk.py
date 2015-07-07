@@ -22,6 +22,7 @@ def parse_minidump(input_stream):
                 else:
                     crash['kind'] = 'killed'
                 crash['subtype'] = fields[1]
+                crash['address'] = fields[2]
                 crash['thread'] = fields[3]
             if fields[0] == 'Module':
                 crash['ids'].append('breakpad:%s' % fields[4])

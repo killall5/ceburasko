@@ -91,6 +91,8 @@ class Accident(Model):
     annotation = TextField(null=True, blank=True)
     user_id = CharField(max_length=40, null=True)
     logs = ManyToManyField(ApplicationLog)
+    subtype = CharField(null=True, max_length=50)
+    address = CharField(null=True, max_length=16)
 
     def __unicode__(self):
         return "Accident #%d" % (self.id, )

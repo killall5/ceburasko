@@ -82,6 +82,8 @@ class MinidumpParseTest(TestCase):
             error = list(stackwalk.parse_minidump(f))[0]
 
         self.assertEqual(error['kind'], 'killed')
+        self.assertEqual(error['subtype'], 'SIGABRT')
+        self.assertEqual(error['address'], '0x3e90000685b')
         self.assertNotIn('file', error['stack'][0])
         self.assertNotIn('fn', error['stack'][0])
         self.assertNotIn('line', error['stack'][0])
@@ -94,6 +96,8 @@ class MinidumpParseTest(TestCase):
             error = list(stackwalk.parse_minidump(f))[0]
 
         self.assertEqual(error['kind'], 'dump')
+        self.assertEqual(error['subtype'], 'DUMP_REQUESTED')
+        self.assertEqual(error['address'], '0x401971')
         self.assertNotIn('file', error['stack'][0])
         self.assertNotIn('fn', error['stack'][0])
         self.assertNotIn('line', error['stack'][0])
@@ -106,6 +110,8 @@ class MinidumpParseTest(TestCase):
             error = list(stackwalk.parse_minidump(f))[0]
 
         self.assertEqual(error['kind'], 'killed')
+        self.assertEqual(error['subtype'], 'SIGSEGV')
+        self.assertEqual(error['address'], '0x0')
         self.assertEqual(error['stack'][0]['fn'], 'crash()')
         self.assertEqual(error['stack'][0]['file'], '/home/mirror/test.cpp')
         self.assertEqual(error['stack'][0]['line'], '15')
