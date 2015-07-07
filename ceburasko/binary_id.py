@@ -90,7 +90,7 @@ def find_by_binary_id(needle_id, paths=[], cache='binary_id_cache.db'):
         for dirpath, dirnames, filenames in os.walk(path):
             for filename in filenames:
                 abs_path = os.path.join(dirpath, filename)
-                if is_exe(abs_path):
+                try:
                     if binary_id(abs_path) == needle_id:
                         if cache:
                             try:
@@ -102,3 +102,5 @@ def find_by_binary_id(needle_id, paths=[], cache='binary_id_cache.db'):
                             conn.commit()
                             conn.close()
                         return abs_path
+                except NoBuildId as e:
+                    continue
