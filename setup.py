@@ -14,7 +14,7 @@ def files(basedir, dirs):
 
 setup(
     name='ceburasko',
-    version='4.1.8',
+    version='4.1.9',
     description='Ceburasko Django app',
     long_description='Django application for store crashes',
     author='Alexey Tamarevskiy',
