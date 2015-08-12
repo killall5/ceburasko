@@ -1,3 +1,9 @@
+ceburasko (4.1.11-1) stable; urgency=medium
+
+  * Trim subtype to 50 chars.
+
+ -- Alexey Tamarevskiy <mirror@inetra.ru>  Wed, 12 Aug 2015 12:05:03 +0600
+
 ceburasko (4.1.10-1) stable; urgency=high
 
   * Add crashed type and address from minidump

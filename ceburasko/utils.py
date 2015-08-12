@@ -61,7 +61,7 @@ def create_or_update_issue(affected_binary, raw_accident, ip, user_id=None):
             user_id=user_id,
         )
         if 'subtype' in raw_accident:
-            accident.subtype = raw_accident['subtype']
+            accident.subtype = raw_accident['subtype'][:50]
         if 'address' in raw_accident:
             accident.address = raw_accident['address']
         if 'annotation' in raw_accident:
