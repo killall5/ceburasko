@@ -14,7 +14,7 @@ class NoBuildId(Exception):
 def binary_id_from_coredump(coredump):
     eu_unstrip = Popen(["eu-unstrip", "-n", "--core", coredump], stdout=PIPE, stderr=PIPE)
     if eu_unstrip.wait() != 0:
-        raise ReadElfFail(unstrip.stderr.read().strip())
+        raise ReadElfFailed(eu_unstrip.stderr.read().strip())
     for line in eu_unstrip.stdout.readlines():
         module_info = line.lower().split()
         build_id = module_info[1]

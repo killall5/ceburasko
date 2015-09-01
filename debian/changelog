@@ -1,3 +1,9 @@
+ceburasko (4.1.12-1) stable; urgency=high
+
+  * Fix typo
+
+ -- Alexey Tamarevskiy <mirror@inetra.ru>  Tue, 01 Sep 2015 16:04:25 +0600
+
 ceburasko (4.1.11-1) stable; urgency=medium
 
   * Trim subtype to 50 chars.
