@@ -84,6 +84,9 @@ class VersionField(with_metaclass(SubfieldBase, IntegerField)):
         major, minor  = value/10000,   value % 10000
         return Version((major, minor, bugfix, build))
 
+    def from_db_value(self, value, expression, connection, context):
+        return self.to_python(value)
+
     def get_prep_value(self, value):
         if value is None:
             return None

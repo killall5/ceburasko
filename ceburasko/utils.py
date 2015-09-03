@@ -1,6 +1,7 @@
 import hashlib
 from ceburasko.models import *
 from django.utils import timezone
+import datetime
 
 
 class UnknownSourceError(RuntimeError):
@@ -30,7 +31,7 @@ def get_significant_frame(stack, sourcepath_set):
     return significant_frame, issue_hash
 
 
-def create_or_update_issue(affected_binary, raw_accident, ip, user_id=None):
+def create_or_update_issue(affected_binary, raw_accident, ip, user_id=None, accident_time=None):
     affected_build = affected_binary.build
     project = affected_build.project
     try:
@@ -59,6 +60,7 @@ def create_or_update_issue(affected_binary, raw_accident, ip, user_id=None):
             binary=affected_binary,
             ip=ip,
             user_id=user_id,
+            datetime=accident_time,
         )
         if 'subtype' in raw_accident:
             accident.subtype = raw_accident['subtype'][:50]
@@ -81,3 +83,21 @@ def update_modified_issues(modified_issues):
             if issue.fixed_version <= issue.last_affected_version:
                 issue.is_fixed = False
         issue.save()
+
+
+"""
+ :returns list of day, crashes count
+"""
+def accidents_by_days_chart(accident_set, last=30):
+    today = datetime.date.today()
+    chart = {d: 0 for d in [today - datetime.timedelta(i) for i in range(last)]}
+    affected_days = accident_set.filter(datetime__gte=today-datetime.timedelta(last)).extra(select={
+        'day': 'date(datetime)'
+    }).values('day').annotate(count=Count('datetime'))
+    for d in affected_days:
+        date = d['day']
+        # some magic here: sqlite return unicode, postgresql -- datetime.date
+        if type(date) != datetime.date:
+            date = datetime.date(*map(int, date.split('-')))
+        chart[date] = d['count']
+    return sorted(chart.iteritems())

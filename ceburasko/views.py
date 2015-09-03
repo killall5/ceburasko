@@ -6,7 +6,6 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from django.conf import settings
-from context_processors import set_default_order, to_order_by
 from ceburasko.utils import *
 import os
 
@@ -57,10 +56,11 @@ def project_list(request):
 
 
 def project_details(request, project_id):
-    set_default_order('-priority')
     p = get_object_or_404(Project, pk=project_id)
-    context = RequestContext(request)
-    order_by = to_order_by(context['order'])
+    try:
+        order_by = request.GET['order']
+    except KeyError:
+        order_by = '-priority'
     opened_issues = p.issue_set.filter(is_fixed=False)
     fixed_issues = p.issue_set.filter(is_fixed=True)
 
@@ -71,7 +71,7 @@ def project_details(request, project_id):
             'opened_issues': opened_issues,
             'fixed_issues': fixed_issues,
         },
-        context_instance=context,
+        context_instance=RequestContext(request),
     )
 
 
@@ -81,10 +81,11 @@ def project_details(request, project_id):
 
 
 def issue_list(request, project_id, is_fixed=False):
-    set_default_order('-priority')
     p = get_object_or_404(Project, pk=project_id)
-    context = RequestContext(request)
-    order_by = to_order_by(context['order'])
+    try:
+        order_by = request.GET['order']
+    except KeyError:
+        order_by = '-priority'
     issues = p.issue_set.extra(select={
        'users_affected': "select count(distinct user_id) from ceburasko_accident "
                          "where ceburasko_accident.issue_id = ceburasko_issue.id",
@@ -100,7 +101,7 @@ def issue_list(request, project_id, is_fixed=False):
             'project': p,
             'issues': issues_paged,
         },
-        context_instance=context
+        context_instance=RequestContext(request),
     )
 
 """
@@ -275,7 +276,6 @@ def upload_accidents(request):
 
 
 def issue_details(request, issue_id):
-    set_default_order('-datetime')
     try:
         issue = Issue.objects.select_related('project').extra(select={
             "users_affected": "select count(distinct user_id) from ceburasko_accident "
@@ -283,8 +283,10 @@ def issue_details(request, issue_id):
         }).get(pk=issue_id)
     except:
         raise Http404("No such issue")
-    context = RequestContext(request)
-    order_by = to_order_by(context['order'])
+    try:
+        order_by = request.GET['order']
+    except KeyError:
+        order_by = '-datetime'
     # FIXME: needs left join
     foreign_trackers = {}
     for tracker in ForeignTracker.objects.all():
@@ -300,13 +302,19 @@ def issue_details(request, issue_id):
                           'ceburasko_accident_logs.accident_id = ceburasko_accident.id'
     }).order_by(order_by)
     accidents = get_paginator(accidents, 25, request.GET.get('page'))
+    accidents_chart = accidents_by_days_chart(issue.accident_set)
+    versions_chart = issue.accident_set.values('build__version').annotate(count=Count('build_id')).values('build__version', 'count')
+    print versions_chart.query
+
     return render_to_response(
         'ceburasko/issue_details.html',
         {'issue': issue,
          'foreign_trackers': foreign_trackers.values(),
          'accidents': accidents,
+         'accidents_by_date': accidents_chart,
+         'accidents_by_version': versions_chart,
          },
-        context_instance=context,
+        context_instance=RequestContext(request),
     )
 
 

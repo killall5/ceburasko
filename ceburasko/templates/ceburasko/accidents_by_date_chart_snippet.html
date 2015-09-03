@@ -1,0 +1,23 @@
+<script type="text/javascript">
+    google.load("visualization", "1.1", {packages:["corechart"]});
+    google.setOnLoadCallback(drawAccidentsChart);
+
+    function drawAccidentsChart() {
+        var data = new google.visualization.arrayToDataTable(
+        [ ['date', 'accidents'],
+        {% for data in chart_data %}
+            [ '{{ data.0|date:"Y-n-j" }}', {{ data.1 }} ],
+        {% endfor %}
+        ]);
+
+        var options = {
+          title: 'Accidents for last days',
+          pointSize: 7,
+          legend: { position: 'none' },
+          vAxis: { viewWindow: { min: 0 }, format: 'decimal' }
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('{{chart_id}}'));
+        chart.draw(data, options);
+    }
+</script>

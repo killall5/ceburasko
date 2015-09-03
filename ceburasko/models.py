@@ -87,7 +87,7 @@ class Accident(Model):
     build = ForeignKey(Build)
     binary = ForeignKey(Binary)
     datetime = DateTimeField(auto_now_add=True, blank=True)
-    ip = IPAddressField()
+    ip = GenericIPAddressField()
     annotation = TextField(null=True, blank=True)
     user_id = CharField(max_length=40, null=True)
     logs = ManyToManyField(ApplicationLog)
@@ -178,6 +178,6 @@ class ForeignIssue(Model):
 
 class Minidump(Model):
     user_id = CharField(max_length=40)
-    ip_address = IPAddressField()
+    ip_address = GenericIPAddressField()
     filepath = CharField(max_length=256)
     modified_time = DateTimeField(auto_now_add=True, blank=True)

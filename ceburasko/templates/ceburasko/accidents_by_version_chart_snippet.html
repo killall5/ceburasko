@@ -1,0 +1,21 @@
+<script type="text/javascript">
+    google.load("visualization", "1.1", {packages:["corechart"]});
+    google.setOnLoadCallback(drawAccidentsChart);
+
+    function drawAccidentsChart() {
+        var data = new google.visualization.arrayToDataTable(
+        [ ['version', 'accidents'],
+        {% for data in chart_data %}
+            [ '{{ data.build__version }}', {{ data.count }} ],
+        {% endfor %}
+        ]);
+
+        var options = {
+            title: 'Affected versions',
+            sliceVisibilityThreshold: .1
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('{{chart_id}}'));
+        chart.draw(data, options);
+    }
+</script>

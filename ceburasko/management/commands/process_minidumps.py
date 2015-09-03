@@ -28,7 +28,8 @@ class Command(BaseCommand):
                         affected_binary,
                         raw_accident,
                         minidump.ip_address,
-                        minidump.user_id,
+                        user_id=minidump.user_id,
+                        accident_time=minidump.modified_time
                     )
                     if accident is not None:
                         modified_issues[issue.id] = issue
