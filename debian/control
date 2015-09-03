@@ -8,8 +8,8 @@ Standards-Version: 3.8.4
 Package: python-ceburasko
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, python-argparse, python-yaml, elfutils, google-breakpad
-Conflicts: python-django (<< 1.7)
-Recommends: python-django (>= 1.7)
+Conflicts: python-django (<< 1.8)
+Recommends: python-django (>= 1.8)
 XB-Python-Version: ${python:Versions}
 Provides: ${python:Provides}
 Description: Ceburasko Django app
