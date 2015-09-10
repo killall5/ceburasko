@@ -88,7 +88,7 @@ def update_modified_issues(modified_issues):
 """
  :returns list of day, crashes count
 """
-def accidents_by_days_chart(accident_set, last=30):
+def accidents_by_date_chart(accident_set, last=30):
     today = datetime.date.today()
     chart = {d: 0 for d in [today - datetime.timedelta(i) for i in range(last)]}
     affected_days = accident_set.filter(datetime__gte=today-datetime.timedelta(last)).extra(select={

@@ -63,6 +63,8 @@ def project_details(request, project_id):
         order_by = '-priority'
     opened_issues = p.issue_set.filter(is_fixed=False)
     fixed_issues = p.issue_set.filter(is_fixed=True)
+    accident_set = Accident.objects.filter(issue__project=project_id)
+    accidents_by_date = accidents_by_date_chart(accident_set)
 
     return render_to_response(
         'ceburasko/project_details.html',
@@ -70,6 +72,7 @@ def project_details(request, project_id):
             'project': p,
             'opened_issues': opened_issues,
             'fixed_issues': fixed_issues,
+            'accidents_by_date': accidents_by_date,
         },
         context_instance=RequestContext(request),
     )
@@ -111,11 +114,20 @@ def issue_list(request, project_id, is_fixed=False):
 
 def build_list(request, project_id):
     p = get_object_or_404(Project, pk=project_id)
-    builds_paged = get_paginator(p.build_set, 25, request.GET.get('page'))
+
+    builds = p.build_set.extra(select={
+       'users_affected': "select count(distinct user_id) from ceburasko_accident "
+                         "where ceburasko_accident.build_id = ceburasko_build.id",
+       'accidents_count': "select count(*) from ceburasko_accident "
+                          "where ceburasko_accident.build_id = ceburasko_build.id",
+    }).order_by('-id')
 
     return render_to_response(
         'ceburasko/build_list.html',
-        {'project': p, 'builds': builds_paged},
+        {
+            'project': p,
+            'builds': builds,
+        },
         context_instance=RequestContext(request)
     )
 
@@ -132,6 +144,20 @@ def build_details(request, build_id):
         {'build': build},
         context_instance=RequestContext(request)
     )
+
+
+def build_toggle_published(request, build_id):
+    build = get_object_or_404(Build, pk=build_id)
+    build.published = not build.published
+    build.save()
+    return HttpResponseRedirect(reverse('ceburasko:builds', args=(build.project.id, )))
+
+
+def build_delete(request, build_id):
+    build = get_object_or_404(Build, pk=build_id)
+    project = build.project
+    build.delete()
+    return HttpResponseRedirect(reverse('ceburasko:builds', args=(project.id, )))
 
 
 """
@@ -302,9 +328,8 @@ def issue_details(request, issue_id):
                           'ceburasko_accident_logs.accident_id = ceburasko_accident.id'
     }).order_by(order_by)
     accidents = get_paginator(accidents, 25, request.GET.get('page'))
-    accidents_chart = accidents_by_days_chart(issue.accident_set)
+    accidents_chart = accidents_by_date_chart(issue.accident_set)
     versions_chart = issue.accident_set.values('build__version').annotate(count=Count('build_id')).values('build__version', 'count')
-    print versions_chart.query
 
     return render_to_response(
         'ceburasko/issue_details.html',

@@ -6,6 +6,7 @@ urlpatterns = patterns('ceburasko.views',
     url(r'^$', 'project_list', name='projects'),
     url(r'^project-(?P<project_id>\d+)/$', 'project_details', name='project_details'),
 
+    url(r'^project-(?P<project_id>\d+)/builds/$', 'build_list', name='builds'),
     url(r'^project-(?P<project_id>\d+)/issues/$', 'issue_list', {'is_fixed': False}, name='issues'),
     url(r'^project-(?P<project_id>\d+)/issues/fixed/$', 'issue_list', {'is_fixed': True}, name='fixed-issues'),
 
@@ -28,4 +29,8 @@ urlpatterns = patterns('ceburasko.views',
 
     url(r'^project-(?P<project_id>\d+)/kinds/$', 'kind_list', name='kinds'),
     url(r'^project-(?P<project_id>\d+)/known-kinds/$', 'known_kind_list'),
+
+    url(r'^build-(?P<build_id>\d+)/$', 'build_details', name='build_details'),
+    url(r'^build-(?P<build_id>\d+)/toggle-published/$', 'build_toggle_published', name='build_toggle_published'),
+    url(r'^build-(?P<build_id>\d+)/delete/$', 'build_delete', name='build_delete'),
 )

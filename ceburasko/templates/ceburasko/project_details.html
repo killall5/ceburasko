@@ -12,6 +12,13 @@
 {% block body %}
 <h1>{{ project }}</h1>
 
+{% include "ceburasko/accidents_by_date_chart_snippet.html" with chart_id="chart_div" chart_data=accidents_by_date%}
+
+<div class="row">
+   <div class="col-md-12" id="chart_div" style="height: 250px">
+   </div>
+</div>
+
 {% include "ceburasko/quick_links_snippet.html" %}
 
 {% endblock %}

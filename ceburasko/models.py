@@ -59,6 +59,7 @@ class Build(Model):
     version = VersionField()
     created_time = DateTimeField(auto_now_add=True, blank=True)
     issues = ManyToManyField(Issue, through='Accident')
+    published = BooleanField(default=False)
 
     def __unicode__(self):
         return '%s' % (self.version, )

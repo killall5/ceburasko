@@ -1,0 +1,44 @@
+{% extends 'ceburasko/base.html' %}
+
+{% block title %} Builds &mdash; {{ project }} &mdash; Ceburasko {% endblock %}
+
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'ceburasko:projects' %}">Projects</a></li>
+        <li><a href="{% url 'ceburasko:project_details' project.id %}">{{ project }}</a></li>
+        <li class="active">Builds</li>
+    </ol>
+{% endblock %}
+
+
+{% block body %}
+<h1>Builds <small>{{project.build_set.count}} total</small></h1>
+
+<table class="table table-striped">
+    <tr>
+        <th>Version</th>
+        <th>Created</th>
+        <th>Published</th>
+        <th>Binaries</th>
+        <th>Accidents</th>
+        <th>Affected users</th>
+        <th>Actions</th>
+    </tr>
+    {% for build in builds %}
+    <tr>
+        <td><a href="{% url 'ceburasko:build_details' build.id %}">{{ build }}</a></td>
+        <td>{{ build.created_time|date:'Y-m-d H:i:s' }}</td>
+        {% if build.published %}
+            <td><a class="label label-primary" role="button" href="{% url 'ceburasko:build_toggle_published' build.id %}">yes</a></td>
+        {% else %}
+            <td><a class="label label-default" role="button" href="{% url 'ceburasko:build_toggle_published' build.id %}">no</a></td>
+        {% endif %}
+        <td>{{ build.binary_set.count }}</td>
+        <td>{{ build.accidents_count }}</td>
+        <td>{{ build.users_affected }}</td>
+        <td><a class="label label-danger" role="button" href="{% url 'ceburasko:build_delete' build.id %}">Delete {{build.version}}</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

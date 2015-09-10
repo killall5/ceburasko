@@ -6,6 +6,7 @@
 <ol class="breadcrumb">
     <li><a href="{% url 'ceburasko:projects' %}">Projects</a></li>
     <li><a href="{% url 'ceburasko:project_details' build.project.id %}">{{ build.project }}</a></li>
+    <li><a href="{% url 'ceburasko:builds' build.project.id %}">Builds</a></li>
     <li class="active">{{ build }}</li>
 </ol>
 {% endblock breadcrumbs %}
@@ -13,7 +14,17 @@
 {% block body %}
 <h1>Build {{ build }}</h1>
 
-<p>Opened issues: {{ opened_issues }}</p>
+<table class="table table-striped">
+    <tr>
+        <th>Filename</th>
+        <th>ID</th>
+    </tr>
+    {% for binary in binaries %}
+    <tr>
+        <td>{{ binary.filename }}</td>
+        <td>{{ binary.hash }}</td>
+    </tr>
+    {% endfor %}
+</table>
 
-<p>Fixed issues: {{ fixed_issues }}</p>
 {% endblock body%}
