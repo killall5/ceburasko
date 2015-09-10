@@ -19,7 +19,7 @@
         <th>Filename</th>
         <th>ID</th>
     </tr>
-    {% for binary in binaries %}
+    {% for binary in build.binary_set %}
     <tr>
         <td>{{ binary.filename }}</td>
         <td>{{ binary.hash }}</td>
