@@ -28,7 +28,7 @@ if __name__ == "__main__":
     stderr = args.coredump.replace('.core', '.stderr')
     try:
         accident = accident_from_coredump(args.coredump)
-        reply = upload_accidents(accident, args.project_url, [stdout, stderr], args.timeout)
+        reply = upload_accidents(accident, args.project_url, [args.coredump, stdout, stderr], args.timeout)
         print reply.read()
     except UploadDataError as e:
         should_cleanup = False
