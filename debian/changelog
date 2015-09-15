@@ -1,9 +1,8 @@
-ceburasko (5.2.0-1) stable; urgency=high
+ceburasko (5.2.1-1) stable; urgency=high
 
   * Add views about builds
-  * Upload coredumps with logs
 
- -- Alexey Tamarevskiy <mirror@inetra.ru>  Mon, 14 Sep 2015 13:35:59 +0600
+ -- Alexey Tamarevskiy <mirror@inetra.ru>  Tue, 15 Sep 2015 13:35:59 +0600
 
 ceburasko (5.0.0-1) stable; urgency=high
 
