@@ -80,7 +80,8 @@ def main():
     valgrind = ['/usr/bin/valgrind']
     valgrind += ['--xml=yes', '--xml-file=%s' % log_filename]
     valgrind += ['--xml-user-comment=%s' % binary_comment]
-    valgrind += args.valgrind_opt
+    if args.valgrind_opt:
+        valgrind += args.valgrind_opt
     valgrind += [args.program] + args.args
     process = subprocess.Popen(valgrind, stdout=stdout, stderr=stderr)
     mih = MyInterruptionHandler(process, log_filename, stdout, stderr)
